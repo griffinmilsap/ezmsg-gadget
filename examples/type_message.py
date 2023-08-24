@@ -7,11 +7,11 @@ from ezmsg.hid.keycodes import (
     MODIFIER_LEFT_SHIFT, 
     KEYCODE_NUMBER_1, 
     KEYCODE_A, 
-    KEYCODE_FORWARD_SLASH
+    KEYCODE_FORWARD_SLASH,
+    KEYCODE_ENTER
 )
 
 from ezmsg.hid.keyboard import KeyboardDevice, KeyboardMessage
-#from ezmsg.util.debuglog import DebugLog
 
 class GhostWriterSettings(ez.Settings):
     message: str
@@ -45,6 +45,13 @@ class GhostWriter(ez.Unit):
             )
 
             await asyncio.sleep(1.0 / self.SETTINGS.pub_rate)
+        
+        yield self.OUTPUT, KeyboardMessage(
+            control_keys = 0x00,
+            hid_keycode = KEYCODE_ENTER
+        )
+
+        await asyncio.sleep(1.0 / self.SETTINGS.pub_rate)
 
         raise ez.Complete
 
@@ -72,14 +79,11 @@ if __name__ == '__main__':
     )
 
     keyboard_device = KeyboardDevice()
-    #log = DebugLog()
 
     ez.run(
         GENERATOR = generator,
         KEYBOARD_DEVICE = keyboard_device,
-        #LOG = log,
         connections = (
-            #(generator.OUTPUT, log.INPUT),
             (generator.OUTPUT, keyboard_device.INPUT),
         )
     )
