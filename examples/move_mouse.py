@@ -9,7 +9,7 @@ from ezmsg.hid.mouse import MouseDevice, MouseMessage
 from ezmsg.util.debuglog import DebugLog
 
 class MouseMessageGeneratorSettings(ez.Settings):
-    pub_rate: float = 10 # Hz
+    pub_rate: float = 50 # Hz
 
 class MouseMessageGenerator(ez.Unit):
     SETTINGS: MouseMessageGeneratorSettings
@@ -31,14 +31,14 @@ if __name__ == '__main__':
 
     generator = MouseMessageGenerator()
     mouse_device = MouseDevice()
-    log = DebugLog()
+    # log = DebugLog()
 
     ez.run(
         GENERATOR = generator,
         MOUSE_DEVICE = mouse_device,
-        LOG = log,
+        # LOG = log,
         connections = (
-            (generator.OUTPUT, log.INPUT),
+            # (generator.OUTPUT, log.INPUT),
             (generator.OUTPUT, mouse_device.INPUT)
         )
     )
