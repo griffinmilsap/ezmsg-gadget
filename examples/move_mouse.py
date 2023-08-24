@@ -39,7 +39,7 @@ if __name__ == '__main__':
         # LOG = log,
         connections = (
             # (generator.OUTPUT, log.INPUT),
-            (generator.OUTPUT, mouse_device.INPUT)
+            (generator.OUTPUT, mouse_device.INPUT),
         )
     )
 
