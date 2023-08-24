@@ -25,9 +25,6 @@ class GhostWriter(ez.Unit):
     @ez.publisher(OUTPUT)
     async def push_buttons(self) -> typing.AsyncGenerator:
         for character in self.SETTINGS.message:
-
-            await asyncio.sleep(1.0 / self.SETTINGS.pub_rate)
-            
             control_keys = 0x00
             keycode = 0x00
 
@@ -46,6 +43,8 @@ class GhostWriter(ez.Unit):
                 control_keys = control_keys, 
                 hid_keycode = keycode
             )
+
+            await asyncio.sleep(1.0 / self.SETTINGS.pub_rate)
 
         raise ez.Complete
 
