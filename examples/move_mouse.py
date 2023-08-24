@@ -6,10 +6,10 @@ import math
 import ezmsg.core as ez
 
 from ezmsg.hid.mouse import MouseDevice, MouseMessage
-from ezmsg.util.debuglog import DebugLog
+# from ezmsg.util.debuglog import DebugLog
 
 class MouseMessageGeneratorSettings(ez.Settings):
-    pub_rate: float = 50 # Hz
+    pub_rate: float = 20 # Hz
 
 class MouseMessageGenerator(ez.Unit):
     SETTINGS: MouseMessageGeneratorSettings
