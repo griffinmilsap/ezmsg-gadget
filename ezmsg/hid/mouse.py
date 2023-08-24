@@ -3,8 +3,14 @@ from . import write as hid_write
 # This comes from LOGICAL_MAXIMUM in the mouse HID descriptor.
 _MAX_MOUSE = (2 ** 15) - 1
 
-def send_mouse_event(mouse_path, buttons, relative_x, relative_y,
-                     vertical_wheel_delta, horizontal_wheel_delta):
+def send_mouse_event(
+        mouse_path: str = '/dev/hidg1', 
+        buttons: chr = 0x00, # Individual buttons (8x)
+        relative_x: float = 0.0, # 0.0-1.0
+        relative_y: float = 0.0, # 0.0-1.0
+        vertical_wheel_delta: float = 0.0, # 0.0-1.0 
+        horizontal_wheel_delta: float = 0.0, # 0.0-1.0
+    ):
 
     x = int(relative_x * _MAX_MOUSE)
     y = int(relative_y * _MAX_MOUSE)
