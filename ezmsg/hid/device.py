@@ -105,7 +105,7 @@ from .messages import ReportMessage
 from pathlib import Path
 from aiofile import async_open, BinaryFileWrapper
 
-from caio import linux_aio, thread_aio
+from caio import thread_aio
 
 class HIDDeviceSettings(ez.Settings):
     device: Path
@@ -121,7 +121,6 @@ class HIDDevice(ez.Unit):
     INPUT_HID = ez.InputStream(ReportMessage)
 
     async def initialize(self) -> None:
-        linux_ctx = linux_aio.Context()
         threads_ctx = thread_aio.Context()
         self.STATE.handle = await async_open(
             self.SETTINGS.device, 'rb+', 
