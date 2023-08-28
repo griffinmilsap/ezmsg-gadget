@@ -124,7 +124,4 @@ class HIDDevice(ez.Unit):
     @ez.subscriber(INPUT_HID)
     async def write(self, msg: ReportMessage) -> None:
         await self.STATE.handle.write(msg.report())
-
-    async def shutdown(self) -> None:
-        await self.STATE.handle.close()
         
