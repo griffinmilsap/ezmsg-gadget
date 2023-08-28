@@ -109,7 +109,8 @@ class HIDDeviceSettings(ez.Settings):
     device: Path
 
 class HIDDeviceState(ez.State):
-    handle: BinaryFileWrapper
+    # handle: BinaryFileWrapper
+    ...
 
 class HIDDevice(ez.Unit):
 
@@ -119,12 +120,15 @@ class HIDDevice(ez.Unit):
     INPUT_HID = ez.InputStream(ReportMessage)
 
     async def initialize(self) -> None:
-        self.STATE.handle = async_open(self.SETTINGS.device, 'rb+')
+        # self.STATE.handle = async_open(self.SETTINGS.device, 'rb+')
+        ...
 
     @ez.subscriber(INPUT_HID)
     async def write(self, msg: ReportMessage) -> None:
-        await self.STATE.handle.write(msg.report())
+        async with async_open(self.SETTINGS.device, 'rb+') as handle:
+            await handle.write(msg.report())
 
     async def shutdown(self) -> None:
-        await self.STATE.handle.close()
+        # await self.STATE.handle.close()
+        ...
         
