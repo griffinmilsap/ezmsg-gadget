@@ -115,7 +115,7 @@ class HIDDeviceState(ez.State):
 class HIDDevice(ez.Unit):
 
     SETTINGS: HIDDeviceSettings
-    # STATE: HIDDeviceState
+    STATE: HIDDeviceState
 
     INPUT_HID = ez.InputStream(ReportMessage)
 
