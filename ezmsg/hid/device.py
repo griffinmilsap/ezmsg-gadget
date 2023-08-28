@@ -102,15 +102,14 @@ def _wait_for_process_exit(target_process):
 
 from .messages import ReportMessage
 
-import os
-import fcntl
 from pathlib import Path
+from aiofile import async_open, BinaryFileWrapper
 
 class HIDDeviceSettings(ez.Settings):
     device: Path
 
 class HIDDeviceState(ez.State):
-    handle: typing.BinaryIO
+    handle: BinaryFileWrapper
 
 class HIDDevice(ez.Unit):
 
@@ -120,13 +119,12 @@ class HIDDevice(ez.Unit):
     INPUT_HID = ez.InputStream(ReportMessage)
 
     async def initialize(self) -> None:
-        self.STATE.handle = open(self.SETTINGS.device, 'rb+')
-        fcntl.fcntl(self.STATE.handle, fcntl.F_SETFL, os.O_NONBLOCK)
+        self.STATE.handle = await async_open(self.SETTINGS.device, 'rb+')
 
     @ez.subscriber(INPUT_HID)
     async def write(self, msg: ReportMessage) -> None:
-        self.STATE.handle.write(msg.report())
+        await self.STATE.handle.write(msg.report())
 
     async def shutdown(self) -> None:
-        self.STATE.handle.close()
+        await self.STATE.handle.close()
         
