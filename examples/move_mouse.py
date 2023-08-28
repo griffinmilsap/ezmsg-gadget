@@ -11,7 +11,7 @@ from ezmsg.hid.device import HIDDevice, HIDDeviceSettings
 from ezmsg.hid.messages import MouseMessage
 
 class MouseMessageGeneratorSettings(ez.Settings):
-    pub_rate: float = 20 # Hz
+    pub_rate: float = 10 # Hz
 
 class MouseMessageGenerator(ez.Unit):
     SETTINGS: MouseMessageGeneratorSettings
@@ -23,10 +23,10 @@ class MouseMessageGenerator(ez.Unit):
         while True:
             await asyncio.sleep(1.0 / self.SETTINGS.pub_rate)
 
-            now = time.time()
+            w = 2.0 * math.pi * 0.1 * time.time()
             yield self.OUTPUT, MouseMessage(
-                relative_x = math.cos(now),
-                relative_y = math.sin(now)
+                relative_x = math.cos(w),
+                relative_y = math.sin(w)
             )
 
 if __name__ == '__main__':
