@@ -1,12 +1,14 @@
 import asyncio
-import time
 import typing
 import math
+import time
+
+from pathlib import Path
 
 import ezmsg.core as ez
 
-from ezmsg.hid.mouse import MouseDevice, MouseMessage
-# from ezmsg.util.debuglog import DebugLog
+from ezmsg.hid.device import HIDDevice, HIDDeviceSettings
+from ezmsg.hid.messages import MouseMessage
 
 class MouseMessageGeneratorSettings(ez.Settings):
     pub_rate: float = 20 # Hz
@@ -30,16 +32,18 @@ class MouseMessageGenerator(ez.Unit):
 if __name__ == '__main__':
 
     generator = MouseMessageGenerator()
-    mouse_device = MouseDevice()
-    # log = DebugLog()
+
+    mouse_device = HIDDevice(
+        HIDDeviceSettings(
+            device = Path('/dev/hidg1')
+        )
+    )
 
     ez.run(
         GENERATOR = generator,
         MOUSE_DEVICE = mouse_device,
-        # LOG = log,
         connections = (
-            # (generator.OUTPUT, log.INPUT),
-            (generator.OUTPUT, mouse_device.INPUT),
+            (generator.OUTPUT, mouse_device.INPUT_HID),
         )
     )
 

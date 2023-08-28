@@ -1,8 +1,12 @@
 import asyncio
 import typing
 
+from pathlib import Path
+
 import ezmsg.core as ez
 
+from ezmsg.hid.device import HIDDevice, HIDDeviceSettings
+from ezmsg.hid.messages import KeyboardMessage
 from ezmsg.hid.keycodes import (
     MODIFIER_LEFT_SHIFT, 
     KEYCODE_NUMBER_1, 
@@ -10,8 +14,6 @@ from ezmsg.hid.keycodes import (
     KEYCODE_FORWARD_SLASH,
     KEYCODE_ENTER
 )
-
-from ezmsg.hid.keyboard import KeyboardDevice, KeyboardMessage
 
 class GhostWriterSettings(ez.Settings):
     message: str
@@ -34,8 +36,7 @@ class GhostWriter(ez.Unit):
                 keycode = ord(character.lower()) - ord('a') + KEYCODE_A
                 if character.isupper():
                     control_keys |= MODIFIER_LEFT_SHIFT
-            else:
-                # ?
+            else: # ?
                 keycode = KEYCODE_FORWARD_SLASH
                 control_keys |= MODIFIER_LEFT_SHIFT
             
@@ -78,13 +79,17 @@ if __name__ == '__main__':
         )
     )
 
-    keyboard_device = KeyboardDevice()
+    keyboard_device = HIDDevice(
+        HIDDeviceSettings(
+            Path('/dev/hidg0')
+        )
+    )
 
     ez.run(
         GENERATOR = generator,
         KEYBOARD_DEVICE = keyboard_device,
         connections = (
-            (generator.OUTPUT, keyboard_device.INPUT),
+            (generator.OUTPUT, keyboard_device.INPUT_HID),
         )
     )
 

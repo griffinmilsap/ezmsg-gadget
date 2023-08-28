@@ -4,7 +4,6 @@ import unittest
 from ezmsg.hid import keyboard
 from ezmsg.hid import keycodes
 
-
 class KeyboardTest(unittest.TestCase):
 
     def test_send_hid_keycode_to_hid_interface(self):

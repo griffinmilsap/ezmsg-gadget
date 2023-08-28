@@ -1,14 +1,28 @@
+from abc import abstractmethod, ABC
 from dataclasses import dataclass
 
-import ezmsg.core as ez
+class ReportMessage(ABC):
+    @abstractmethod
+    def report(self) -> bytearray:
+        raise NotImplementedError()
 
-from . import write as hid_write
+@dataclass
+class KeyboardMessage(ReportMessage):
+    control_keys: chr = 0x00
+    hid_keycode: chr = 0x00
+    tap: bool = True
 
+    def report(self) -> bytearray:
+        buf = [0] * 16
+        buf[0] = self.control_keys
+        buf[2] = self.hid_keycode
+        return bytearray(buf[:(16 if self.tap else 8)])
+    
 # This comes from LOGICAL_MAXIMUM in the mouse HID descriptor.
 _MAX_MOUSE = (2 ** 15) - 1
 
 @dataclass
-class MouseMessage:
+class MouseMessage(ReportMessage):
     buttons: chr = 0x00 # Individual buttons (8x)
     relative_x: float = 0.0 # 0.0-1.0
     relative_y: float = 0.0 # 0.0-1.0
@@ -29,23 +43,3 @@ class MouseMessage:
         buf[6] = self.horizontal_wheel_delta & 0xff
 
         return bytearray(buf)
-
-class MouseDeviceSettings(ez.Settings):
-    mouse_path: str = '/dev/hidg1'
-
-class MouseDeviceState(ez.State):
-    ...
-
-class MouseDevice(ez.Unit):
-
-    SETTINGS: MouseDeviceSettings
-    STATE: MouseDeviceState
-
-    INPUT = ez.InputStream(MouseMessage)
-
-    @ez.subscriber(INPUT)
-    async def on_mouse_msg(self, msg: MouseMessage) -> None:
-        # TODO: Replace with aiofile; this blocks
-        hid_write.write_to_hid_interface(self.SETTINGS.mouse_path, msg.report())
-
-    
