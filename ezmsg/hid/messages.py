@@ -1,13 +1,13 @@
 from abc import abstractmethod, ABC
 from dataclasses import dataclass
 
-class ReportMessage(ABC):
+class HIDMessage(ABC):
     @abstractmethod
     def report(self) -> bytearray:
         raise NotImplementedError()
 
 @dataclass
-class KeyboardMessage(ReportMessage):
+class KeyboardMessage(HIDMessage):
     control_keys: chr = 0x00
     hid_keycode: chr = 0x00
     tap: bool = True
@@ -22,7 +22,7 @@ class KeyboardMessage(ReportMessage):
 _MAX_MOUSE = (2 ** 15) - 1
 
 @dataclass
-class MouseMessage(ReportMessage):
+class MouseMessage(HIDMessage):
     buttons: chr = 0x00 # Individual buttons (8x)
     relative_x: float = 0.0 # 0.0-1.0
     relative_y: float = 0.0 # 0.0-1.0

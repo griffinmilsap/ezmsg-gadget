@@ -25,8 +25,8 @@ class MouseMessageGenerator(ez.Unit):
 
             w = 2.0 * math.pi * 0.1 * time.time()
             yield self.OUTPUT, MouseMessage(
-                relative_x = (math.cos(w) / 2.0) + 1.0,
-                relative_y = (math.sin(w) / 2.0) + 1.0
+                relative_x = ((math.cos(w) / 2.0) + 1.0) * 0.01,
+                relative_y = ((math.sin(w) / 2.0) + 1.0) * 0.01
             )
 
 if __name__ == '__main__':
