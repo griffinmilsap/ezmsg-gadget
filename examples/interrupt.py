@@ -4,9 +4,9 @@ from pathlib import Path
 
 import ezmsg.core as ez
 
-from ezmsg.hid.keycodes import MODIFIER_LEFT_CTRL, KEYCODE_C
-from ezmsg.hid.messages import KeyboardMessage
-from ezmsg.hid.device import HIDDevice, HIDDeviceSettings
+from ezmsg.gadget.keycodes import MODIFIER_LEFT_CTRL, KEYCODE_C
+from ezmsg.gadget.messages import KeyboardMessage
+from ezmsg.gadget.hiddevice import HIDDevice, HIDDeviceSettings
 
 class SendInterrupt(ez.Unit):
     OUTPUT = ez.OutputStream(KeyboardMessage)

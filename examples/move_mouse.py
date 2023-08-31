@@ -7,8 +7,8 @@ from pathlib import Path
 
 import ezmsg.core as ez
 
-from ezmsg.hid.device import HIDDevice, HIDDeviceSettings
-from ezmsg.hid.messages import MouseMessage
+from ezmsg.gadget.hiddevice import HIDDevice, HIDDeviceSettings
+from ezmsg.gadget.messages import MouseMessage
 
 class MouseMessageGeneratorSettings(ez.Settings):
     pub_rate: float = 10 # Hz
@@ -23,10 +23,11 @@ class MouseMessageGenerator(ez.Unit):
         while True:
             await asyncio.sleep(1.0 / self.SETTINGS.pub_rate)
 
-            w = 2.0 * math.pi * 0.1 * time.time()
+            w = 2.0 * math.pi * time.time()
+            cpx = math.exp(w * 1.0j) * (math.cos(0.1 * w) + 1.0) / 2.0
             yield self.OUTPUT, MouseMessage(
-                relative_x = ((math.cos(w) / 2.0) + 1.0) * 0.01,
-                relative_y = ((math.sin(w) / 2.0) + 1.0) * 0.01
+                relative_x = (cpx.real / 2.0) + 1.0,
+                relative_y = (cpx.imag / 2.0) + 1.0
             )
 
 if __name__ == '__main__':
