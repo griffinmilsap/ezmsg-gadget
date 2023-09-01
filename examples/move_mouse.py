@@ -9,7 +9,7 @@ import numpy as np
 import ezmsg.core as ez
 
 from ezmsg.gadget.hiddevice import HIDDevice, HIDDeviceSettings
-from ezmsg.gadget.messages import MouseMessage
+from ezmsg.gadget.functions.mouse import MouseMessage
 
 class MouseMessageGeneratorSettings(ez.Settings):
     pub_rate: float = 10 # Hz
