@@ -3,6 +3,11 @@ import argparse
 import typing
 import configparser
 
+from .config import setup_gadget
+from .keyboard import KeyboardFunction
+from .mouse import MouseFunction
+from .ethernet import EthernetFunction
+
 from pathlib import Path
 
 import ezmsg.core as ez
@@ -20,6 +25,7 @@ _MODULES_DIR = lambda root: root / 'etc' / 'modules-load.d'
 _SERVICE_DIR = lambda root: root / 'lib' / 'systemd' / 'system'
 _ENUMERATE_SERVICE_FILE = 'ezmsg-gadget-enumerate.service'
 
+# TODO Set this up with configparser
 def _ENUMERATE_SERVICE() -> str:
     return """
     [Unit]
@@ -114,14 +120,27 @@ def uninstall(root: Path = Path('/'), yes: bool = False) -> None:
 
 
 def enumerate() -> None:
-    # Arguments for mouse, keyboard, ethernet (and mac addresses)
-    ...
 
-def remove_all() -> None:
-    # Remove all UDC functions and configs
-    # Note enumerate is supposed to do this on shutdown but we provide this on 
-    # commandline to clean up files in case enumerate fails for whatever reason
-    ...
+    gadget = setup_gadget(
+        mouse_rel = MouseFunction, 
+        keyboard0 = KeyboardFunction,
+        usb0 = EthernetFunction,
+    )
+
+    gadget.activate()
+
+    # TODO: Ensure users can interact with hidg devices
+    # Maybe this is best done by changing the group instead of chmod 777
+    # chmod 777 /dev/hidg0
+    # chmod 777 /dev/hidg1
+
+    # TODO: Maybe restart dnsmasq?
+    # systemctl restart dnsmasq.service
+
+    # TODO: CHILL OUT AND WAIT HERE UNTIL SHUTDOWN
+
+    gadget.deactivate()
+    gadget.destroy()
 
 def serve() -> None:
     # Serve HID endpoints

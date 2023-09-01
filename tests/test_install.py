@@ -22,6 +22,9 @@ def test_install():
         _SERVICE_DIR(root).mkdir(parents = True, exist_ok = False)
 
         install(root, service = True, yes = True)
+
+        # TODO: Actually check the temp file system
+
         uninstall(root, yes = True)
 
 if __name__ == '__main__':
