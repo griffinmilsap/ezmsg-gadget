@@ -183,6 +183,7 @@ def cmdline() -> None:
                 enumerate(args.config)
         except PermissionError:
             ez.logger.error('Permission Error. Run this as superuser.')  
+            raise
 
     elif args.command == 'serve':
         ...
