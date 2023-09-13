@@ -27,6 +27,12 @@ def test_enumerate():
         )
 
         gadget.activate('usb0')
+
+        # ls /sys/class/udc > "${USB_DEVICE_PATH}/UDC"
+        # chmod 777 /dev/hidg0
+        # chmod 777 /dev/hidg1
+        # systemctl restart dnsmasq.service
+
         gadget.deactivate()
         # gadget.destroy()
 

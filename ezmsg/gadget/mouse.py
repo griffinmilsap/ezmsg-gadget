@@ -54,6 +54,7 @@ class MouseFunction(HIDFunction):
         ])
 
 # This comes from LOGICAL_MAXIMUM in the mouse HID descriptor.
+# FIXME: Maybe couple these definitions together
 _MAX_MOUSE = (2 ** 15) - 1
 
 @dataclass
