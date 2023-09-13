@@ -65,7 +65,8 @@ if __name__ == '__main__':
     parser.add_argument(
         'message',
         type = str,
-        help = 'message to type (keep it alphanumeric)'
+        help = 'message to type (keep it alphanumeric)',
+        default = 'Wake up, Neo...'
     )
 
     class Args:
