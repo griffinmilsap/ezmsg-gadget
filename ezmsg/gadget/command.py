@@ -139,11 +139,10 @@ def enumerate(config: Path) -> None:
     # TODO: Maybe restart dnsmasq?
     # systemctl restart dnsmasq.service
 
-    try:
-        while True:
-            time.sleep(1.0)
-    except KeyboardInterrupt:
-        ez.logger.info('Interrupted')
+
+def destroy(config: Path) -> None:
+
+    gadget = setup_gadget()
 
     ez.logger.info('Deactivating Gadget')
 
@@ -162,7 +161,7 @@ def cmdline() -> None:
 
     parser.add_argument(
         'command',
-        choices = ['enumerate', 'install', 'uninstall']
+        choices = ['enumerate', 'destroy', 'install', 'uninstall']
     )
 
     parser.add_argument(
@@ -185,10 +184,13 @@ def cmdline() -> None:
 
     args = parser.parse_args(namespace = Args)
 
-    if args.command in ['enumerate', 'install', 'uninstall']:
+    if args.command in ['enumerate', 'destroy', 'install', 'uninstall']:
         try:
             if args.command == 'enumerate':
                 enumerate(args.config)
+            elif args.command == 'destroy':
+                destroy(args.config)
+                
         except PermissionError:
             ez.logger.error('Permission Error. Run this as superuser.')  
             raise
