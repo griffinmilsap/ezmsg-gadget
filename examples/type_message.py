@@ -20,7 +20,7 @@ from ezmsg.gadget.keyboard import (
 
 class GhostWriterSettings(ez.Settings):
     message: str
-    pub_rate: float = 0.3 # Hz
+    pub_rate: float = 3 # Hz
 
 class GhostWriter(ez.Unit):
     SETTINGS: GhostWriterSettings
