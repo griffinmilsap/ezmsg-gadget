@@ -63,7 +63,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = 'Keyboard typing demo')
 
     parser.add_argument(
-        'message',
+        '--message', '-m',
         type = str,
         help = 'message to type (keep it alphanumeric)',
         default = 'Wake up, Neo...'
