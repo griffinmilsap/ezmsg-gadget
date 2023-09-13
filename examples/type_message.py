@@ -12,12 +12,15 @@ from ezmsg.gadget.keyboard import (
     KEYCODE_NUMBER_1, 
     KEYCODE_A, 
     KEYCODE_FORWARD_SLASH,
-    KEYCODE_ENTER
+    KEYCODE_ENTER,
+    KEYCODE_SPACEBAR,
+    KEYCODE_COMMA,
+    KEYCODE_PERIOD
 )
 
 class GhostWriterSettings(ez.Settings):
     message: str
-    pub_rate: float = 1 # Hz
+    pub_rate: float = 0.3 # Hz
 
 class GhostWriter(ez.Unit):
     SETTINGS: GhostWriterSettings
@@ -36,6 +39,12 @@ class GhostWriter(ez.Unit):
                 keycode = ord(character.lower()) - ord('a') + KEYCODE_A
                 if character.isupper():
                     control_keys |= MODIFIER_LEFT_SHIFT
+            elif character == ' ':
+                keycode = KEYCODE_SPACEBAR
+            elif character == ',':
+                keycode = KEYCODE_COMMA
+            elif character == '.':
+                keycode = KEYCODE_PERIOD
             else: # ?
                 keycode = KEYCODE_FORWARD_SLASH
                 control_keys |= MODIFIER_LEFT_SHIFT
