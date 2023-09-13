@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
     mouse_device = HIDDevice(
         HIDDeviceSettings(
-            device = Path('/dev/hidg1')
+            function_name = 'mouse_rel'
         )
     )
 

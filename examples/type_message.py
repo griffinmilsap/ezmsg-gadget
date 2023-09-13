@@ -81,7 +81,7 @@ if __name__ == '__main__':
 
     keyboard_device = HIDDevice(
         HIDDeviceSettings(
-            Path('/dev/hidg0')
+            function_name = 'keyboard0'
         )
     )
 

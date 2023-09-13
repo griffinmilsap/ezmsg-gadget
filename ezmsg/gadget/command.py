@@ -190,10 +190,13 @@ def cmdline() -> None:
                 enumerate(args.config)
             elif args.command == 'destroy':
                 destroy(args.config)
-                
+
         except PermissionError:
             ez.logger.error('Permission Error. Run this as superuser.')  
             raise
 
     elif args.command == 'serve':
         ...
+
+if __name__ == '__main__':
+    cmdline()

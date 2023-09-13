@@ -1,9 +1,12 @@
 import abc
+import asyncio
 
 from pathlib import Path
 
 import ezmsg.core as ez
+
 from aiofile import async_open, BinaryFileWrapper
+from ezmsg.gadget.config import USBGadget, _GADGET_PATH
 
 
 class HIDMessage(abc.ABC):
@@ -13,7 +16,9 @@ class HIDMessage(abc.ABC):
 
 
 class HIDDeviceSettings(ez.Settings):
-    device: Path
+    function_name: str
+    device_name: str = 'g1'
+    root: Path = Path('/')
 
 
 class HIDDeviceState(ez.State):
@@ -28,7 +33,20 @@ class HIDDevice(ez.Unit):
     INPUT_HID = ez.InputStream(HIDMessage)
 
     async def initialize(self) -> None:
-        self.STATE.handle = await async_open(self.SETTINGS.device, 'rb+') # type: ignore
+        # Find the corresponding kernel object
+        gadget_path = self.SETTINGS.root / _GADGET_PATH
+        gadget = USBGadget(self.SETTINGS.device_name, path = str(gadget_path))
+        kobj = gadget['functions'][self.SETTINGS.function_name].dev
+        
+        # Get the file descriptor that maps to that kernel object
+        kobj_fd = self.SETTINGS.root / 'sys/dev/char' / str(kobj)
+        command = f"devadm info -r -q name {kobj_fd}"
+        proc = await asyncio.create_subprocess_shell(command)
+        stdout, stderr = await proc.communicate()
+        descriptor = stdout.decode('ascii').strip()
+        
+        # Open the handle in binary mode read/append mode
+        self.STATE.handle = await async_open(descriptor, 'rb+') # type: ignore
 
     @ez.subscriber(INPUT_HID)
     async def write(self, msg: HIDMessage) -> None:
