@@ -1,6 +1,7 @@
 import os
 import argparse
 import typing
+import time
 import configparser
 
 from .config import setup_gadget
@@ -127,6 +128,7 @@ def enumerate(config: Path) -> None:
         usb0 = EthernetFunction,
     )
 
+    ez.logger.info('Activating Gadget')
     gadget.activate()
 
     # TODO: Ensure users can interact with hidg devices
@@ -137,7 +139,13 @@ def enumerate(config: Path) -> None:
     # TODO: Maybe restart dnsmasq?
     # systemctl restart dnsmasq.service
 
-    # TODO: CHILL OUT AND WAIT HERE UNTIL SHUTDOWN
+    try:
+        while True:
+            time.sleep(1.0)
+    except KeyboardInterrupt:
+        ez.logger.info('Interrupted')
+
+    ez.logger.info('Deactivating Gadget')
 
     gadget.deactivate()
     gadget.destroy()
