@@ -6,8 +6,8 @@ from pathlib import Path
 import ezmsg.core as ez
 
 from ezmsg.gadget.hiddevice import HIDDevice, HIDDeviceSettings
-from ezmsg.gadget.messages import KeyboardMessage
-from ezmsg.gadget.keycodes import (
+from ezmsg.gadget.keyboard import (
+    KeyboardMessage,
     MODIFIER_LEFT_SHIFT, 
     KEYCODE_NUMBER_1, 
     KEYCODE_A, 
