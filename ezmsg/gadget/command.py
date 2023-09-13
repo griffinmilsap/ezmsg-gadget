@@ -119,7 +119,7 @@ def uninstall(root: Path = Path('/'), yes: bool = False) -> None:
     ez.logger.info("ezmsg-gadget uninstall completed.  reboot encouraged.")
 
 
-def enumerate() -> None:
+def enumerate(config: Path) -> None:
 
     gadget = setup_gadget(
         mouse_rel = MouseFunction, 
@@ -149,14 +149,40 @@ def serve() -> None:
 def cmdline() -> None:
 
     parser = argparse.ArgumentParser(
-        description = "configuration"
+        description = "config and control"
     )
 
-    # Add a -y for yes
+    parser.add_argument(
+        'command',
+        choices = ['enumerate', 'install', 'uninstall']
+    )
 
-    args = parser.parse_args()
+    parser.add_argument(
+        '--config', '-c',
+        type = lambda x: Path(x),
+        default = Path('/etc/ezmsg-gadget.conf'),
+        help = 'config file for gadget settings; only used with enumerate'
+    )
 
-    # install, enumerate, remove_all require superuser permissions
-    # Check for superuser HERE
+    parser.add_argument(
+        '--yes', '-y',
+        action = 'store_true',
+        help = 'yes to all questions for interactive install/uninstall'
+    )
 
-    # serve doesn't require superuser
+    class Args:
+        command: str
+        config: Path
+        yes: bool
+
+    args = parser.parse_args(namespace = Args)
+
+    if args.command in ['enumerate', 'install', 'uninstall']:
+        try:
+            if args.command == 'enumerate':
+                enumerate(args.config)
+        except PermissionError:
+            ez.logger.error('Permission Error. Run this as superuser.')  
+
+    elif args.command == 'serve':
+        ...
