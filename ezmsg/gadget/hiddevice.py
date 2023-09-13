@@ -36,7 +36,7 @@ class HIDDevice(ez.Unit):
         # Find the corresponding kernel object
         gadget_path = self.SETTINGS.root / _GADGET_PATH
         gadget = USBGadget(self.SETTINGS.device_name, path = str(gadget_path))
-        kobj = gadget['functions'][self.SETTINGS.function_name].dev
+        kobj = gadget['functions'][f'hid.{self.SETTINGS.function_name}'].dev
         
         # Get the file descriptor that maps to that kernel object
         kobj_fd = self.SETTINGS.root / 'sys/dev/char' / str(kobj)
