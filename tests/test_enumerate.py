@@ -6,9 +6,6 @@ from pathlib import Path
 import pytest
 
 from ezmsg.gadget.config import setup_gadget, _GADGET_PATH
-from ezmsg.gadget.mouse import MouseFunction
-from ezmsg.gadget.keyboard import KeyboardFunction
-from ezmsg.gadget.ethernet import EthernetFunction
 
 def test_enumerate():
 
@@ -19,12 +16,7 @@ def test_enumerate():
         gadget_path = root / _GADGET_PATH
         gadget_path.mkdir(parents = True, exist_ok = False)
 
-        gadget = setup_gadget(
-            mouse_rel = MouseFunction, 
-            keyboard0 = KeyboardFunction,
-            usb0 = EthernetFunction,
-            root = root
-        )
+        gadget = setup_gadget(root = root)
 
         gadget.activate('usb0')
 

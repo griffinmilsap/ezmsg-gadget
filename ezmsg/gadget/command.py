@@ -5,9 +5,6 @@ import time
 import configparser
 
 from .config import setup_gadget
-from .keyboard import KeyboardFunction
-from .mouse import MouseFunction
-from .ethernet import EthernetFunction
 
 from pathlib import Path
 
@@ -122,11 +119,14 @@ def uninstall(root: Path = Path('/'), yes: bool = False) -> None:
 
 def enumerate(config: Path) -> None:
 
-    gadget = setup_gadget(
-        mouse_rel = MouseFunction, 
-        keyboard0 = KeyboardFunction,
-        usb0 = EthernetFunction,
-    )
+    gadget = setup_gadget()
+
+    # Parse Config
+
+    # Add functions
+    # for function_name, function in functions.items():
+    #     fn = function(gadget, function_name)
+    #     gadget.link(fn, config)
 
     ez.logger.info('Activating Gadget')
     gadget.activate()

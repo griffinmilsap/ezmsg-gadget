@@ -1,22 +1,10 @@
 import asyncio
 import typing
 
-from pathlib import Path
-
 import ezmsg.core as ez
 
 from ezmsg.gadget.hiddevice import HIDDevice, HIDDeviceSettings
-from ezmsg.gadget.keyboard import (
-    KeyboardMessage,
-    MODIFIER_LEFT_SHIFT, 
-    KEYCODE_NUMBER_1, 
-    KEYCODE_A, 
-    KEYCODE_FORWARD_SLASH,
-    KEYCODE_ENTER,
-    KEYCODE_SPACEBAR,
-    KEYCODE_COMMA,
-    KEYCODE_PERIOD
-)
+from ezmsg.gadget.function import Keyboard
 
 class GhostWriterSettings(ez.Settings):
     message: str
@@ -25,7 +13,7 @@ class GhostWriterSettings(ez.Settings):
 class GhostWriter(ez.Unit):
     SETTINGS: GhostWriterSettings
 
-    OUTPUT = ez.OutputStream(KeyboardMessage)
+    OUTPUT = ez.OutputStream(Keyboard.Message)
 
     @ez.publisher(OUTPUT)
     async def push_buttons(self) -> typing.AsyncGenerator:
@@ -34,31 +22,31 @@ class GhostWriter(ez.Unit):
             keycode = 0x00
 
             if character.isdigit():
-                keycode = ord(character) - ord('0') + KEYCODE_NUMBER_1
+                keycode = ord(character) - ord('0') + Keyboard.KEYCODE_NUMBER_1
             elif character.isalpha():
-                keycode = ord(character.lower()) - ord('a') + KEYCODE_A
+                keycode = ord(character.lower()) - ord('a') + Keyboard.KEYCODE_A
                 if character.isupper():
-                    control_keys |= MODIFIER_LEFT_SHIFT
+                    control_keys |= Keyboard.MODIFIER_LEFT_SHIFT
             elif character == ' ':
-                keycode = KEYCODE_SPACEBAR
+                keycode = Keyboard.KEYCODE_SPACEBAR
             elif character == ',':
-                keycode = KEYCODE_COMMA
+                keycode = Keyboard.KEYCODE_COMMA
             elif character == '.':
-                keycode = KEYCODE_PERIOD
+                keycode = Keyboard.KEYCODE_PERIOD
             else: # ?
-                keycode = KEYCODE_FORWARD_SLASH
-                control_keys |= MODIFIER_LEFT_SHIFT
+                keycode = Keyboard.KEYCODE_FORWARD_SLASH
+                control_keys |= Keyboard.MODIFIER_LEFT_SHIFT
             
-            yield self.OUTPUT, KeyboardMessage(
+            yield self.OUTPUT, Keyboard.Message(
                 control_keys = control_keys, 
                 hid_keycode = keycode
             )
 
             await asyncio.sleep(1.0 / self.SETTINGS.pub_rate)
         
-        yield self.OUTPUT, KeyboardMessage(
+        yield self.OUTPUT, Keyboard.Message(
             control_keys = 0x00,
-            hid_keycode = KEYCODE_ENTER
+            hid_keycode = Keyboard.KEYCODE_ENTER
         )
 
         await asyncio.sleep(1.0 / self.SETTINGS.pub_rate)

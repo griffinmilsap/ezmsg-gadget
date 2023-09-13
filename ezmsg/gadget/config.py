@@ -1,26 +1,25 @@
+import os
 import typing
+
+from configparser import ConfigParser
 
 from pathlib import Path
 
-from usb_gadget import USBGadget, USBFunction
-from ezmsg.core.util import either_dict_or_kwargs
+from usb_gadget import USBGadget
 
-_GADGET_PATH = Path('sys/kernel/config/usb_gadget')
+_CONFIG_ENV = 'EZMSG_GADGET_CONFIG'
+_CONFIG_PATH = Path(os.environ.get(_CONFIG_ENV, '/etc/ezmsg-gadget.conf'))
+_GADGET_PATH = Path('/sys/kernel/config/usb_gadget')
 _EN_US = '0x409'
 
-def setup_gadget(
-    functions: typing.Optional[typing.Mapping[str, typing.Type[USBFunction]]] = None, 
-    root: Path = Path('/'), 
-    device_name: str = 'g1',
-    **functions_kwargs: typing.Type[USBFunction],
-) -> USBGadget:
+def setup_gadget(device_name: str = 'g1', root: Path = Path('/')) -> USBGadget:
     
+    # Ability to change root mostly here for unit testing.
+    # TODO: Find a way to expose this functionality without adding a keyword arg. Environment variable?
     gadget_path = root / _GADGET_PATH
 
     if not gadget_path.exists():
         raise ValueError("Filesystem does not contain usb_gadget configfs")
-    
-    functions = either_dict_or_kwargs(functions, functions_kwargs, "setup_gadget")
     
     gadget = USBGadget(device_name, path = str(gadget_path))
 
@@ -42,9 +41,22 @@ def setup_gadget(
     config.MaxPower = '250'
     config['strings'][_EN_US].configuration = 'Config 1: ECM network'
 
-    # Add functions
-    for function_name, function in functions.items():
-        fn = function(gadget, function_name)
-        gadget.link(fn, config)
-
     return gadget
+
+def load_config(config_path: typing.Optional[Path] = None) -> ConfigParser:
+
+    if config_path is None:
+        config_path = _CONFIG_PATH
+
+    config_files = []
+    if config_path.exists() and config_path.is_file():
+        config_files.append(config_path)
+    config_dir = config_path.with_suffix('.d')
+    if config_dir.exists() and config_dir.is_dir():
+        for fname in config_dir.glob('*'):
+            config_files.append(fname)
+
+    config = ConfigParser()
+    config.read(config_files)
+
+    return config

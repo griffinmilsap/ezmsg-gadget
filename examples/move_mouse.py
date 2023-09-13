@@ -3,13 +3,11 @@ import typing
 import math
 import time
 
-from pathlib import Path
-
 import numpy as np
 import ezmsg.core as ez
 
 from ezmsg.gadget.hiddevice import HIDDevice, HIDDeviceSettings
-from ezmsg.gadget.mouse import MouseMessage
+from ezmsg.gadget.function import Mouse
 
 class MouseMessageGeneratorSettings(ez.Settings):
     pub_rate: float = 10 # Hz
@@ -17,7 +15,7 @@ class MouseMessageGeneratorSettings(ez.Settings):
 class MouseMessageGenerator(ez.Unit):
     SETTINGS: MouseMessageGeneratorSettings
 
-    OUTPUT = ez.OutputStream(MouseMessage)
+    OUTPUT = ez.OutputStream(Mouse.Message)
 
     @ez.publisher(OUTPUT)
     async def output_mouse(self) -> typing.AsyncGenerator:
@@ -32,7 +30,7 @@ class MouseMessageGenerator(ez.Unit):
             w = 2.0 * math.pi * 2.0 * time.time()
             mag = (np.cos(0.5 * w) + 1.0) / 2.0
             cpx = np.exp(w * 1.0j) * mag
-            yield self.OUTPUT, MouseMessage(
+            yield self.OUTPUT, Mouse.Message(
                 relative_x = (cpx.real + 1.0) / 2.0,
                 relative_y = (cpx.imag + 1.0) / 2.0
             )
