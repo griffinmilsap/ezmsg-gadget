@@ -1,14 +1,15 @@
 import os
 import argparse
 import typing
-import time
-import configparser
-
-from .config import setup_gadget
+import subprocess
 
 from pathlib import Path
 
 import ezmsg.core as ez
+
+from usb_gadget import HIDFunction
+
+from .config import setup_gadget
 
 def _confirm_prompt(question: str, yes: bool = False) -> bool:
     reply = None if not yes else ""
@@ -117,35 +118,24 @@ def uninstall(root: Path = Path('/'), yes: bool = False) -> None:
     ez.logger.info("ezmsg-gadget uninstall completed.  reboot encouraged.")
 
 
-def enumerate(config: Path) -> None:
+def enumerate(config_path: typing.Optional[Path] = None) -> None:
 
-    gadget = setup_gadget()
-
-    # Parse Config
-
-    # Add functions
-    # for function_name, function in functions.items():
-    #     fn = function(gadget, function_name)
-    #     gadget.link(fn, config)
+    gadget, functions = setup_gadget(config_path = config_path)
 
     ez.logger.info('Activating Gadget')
     gadget.activate()
 
-    # TODO: Ensure users can interact with hidg devices
-    # Maybe this is best done by changing the group instead of chmod 777
-    # chmod 777 /dev/hidg0
-    # chmod 777 /dev/hidg1
-
-    # TODO: Maybe restart dnsmasq?
-    # systemctl restart dnsmasq.service
+    # Change permissions of associated HID devices
+    for function in functions:
+        if isinstance(function, HIDFunction):
+            subprocess.run(['chgrp', 'input', function.device], shell = True)
 
 
-def destroy(config: Path) -> None:
+def deactivate(config_path: typing.Optional[Path] = None) -> None:
 
-    gadget = setup_gadget()
+    gadget, _ = setup_gadget(config_path = config_path)
 
     ez.logger.info('Deactivating Gadget')
-
     gadget.deactivate()
     gadget.destroy()
 
@@ -161,13 +151,13 @@ def cmdline() -> None:
 
     parser.add_argument(
         'command',
-        choices = ['enumerate', 'destroy', 'install', 'uninstall']
+        choices = ['enumerate', 'deactivate', 'install', 'uninstall']
     )
 
     parser.add_argument(
         '--config', '-c',
         type = lambda x: Path(x),
-        default = Path('/etc/ezmsg-gadget.conf'),
+        default = None,
         help = 'config file for gadget settings; only used with enumerate'
     )
 
@@ -179,17 +169,17 @@ def cmdline() -> None:
 
     class Args:
         command: str
-        config: Path
+        config: typing.Optional[Path]
         yes: bool
 
     args = parser.parse_args(namespace = Args)
 
-    if args.command in ['enumerate', 'destroy', 'install', 'uninstall']:
+    if args.command in ['enumerate', 'deactivate', 'install', 'uninstall']:
         try:
             if args.command == 'enumerate':
                 enumerate(args.config)
-            elif args.command == 'destroy':
-                destroy(args.config)
+            elif args.command == 'deactivate':
+                deactivate(args.config)
 
         except PermissionError:
             ez.logger.error('Permission Error. Run this as superuser.')  

@@ -1,18 +1,33 @@
 import os
 import typing
+import importlib
 
+from functools import reduce
 from configparser import ConfigParser
 
 from pathlib import Path
 
-from usb_gadget import USBGadget
+from usb_gadget import USBGadget, USBFunction
 
 _CONFIG_ENV = 'EZMSG_GADGET_CONFIG'
 _CONFIG_PATH = Path(os.environ.get(_CONFIG_ENV, '/etc/ezmsg-gadget.conf'))
 _GADGET_PATH = Path('/sys/kernel/config/usb_gadget')
 _EN_US = '0x409'
 
-def setup_gadget(device_name: str = 'g1', root: Path = Path('/')) -> USBGadget:
+def _import_type(typestr: str) -> typing.Type[USBFunction]:
+    module, name = typestr.split(":")
+    module = importlib.import_module(module)
+    ty = reduce(lambda t, n: getattr(t, n), [module] + name.split("."))
+
+    if not isinstance(ty, type):
+        raise ImportError(f"{typestr} does not resolve to type")
+
+    return ty
+
+def setup_gadget(
+        config_path: typing.Optional[Path] = None, 
+        root: Path = Path('/')
+    ) -> typing.Tuple[USBGadget, typing.List[USBFunction]]:
     
     # Ability to change root mostly here for unit testing.
     # TODO: Find a way to expose this functionality without adding a keyword arg. Environment variable?
@@ -21,9 +36,13 @@ def setup_gadget(device_name: str = 'g1', root: Path = Path('/')) -> USBGadget:
     if not gadget_path.exists():
         raise ValueError("Filesystem does not contain usb_gadget configfs")
     
-    gadget = USBGadget(device_name, path = str(gadget_path))
+    # Parse Config
+    cfg = load_config(config_path)
+    device_name = cfg.get('device', 'name', fallback = 'g1')
+    # TODO: A lot more of this info could be brought in from the config file
 
-    # Gadget ID
+    # Create gadget and set IDs
+    gadget = USBGadget(device_name, path = str(gadget_path))
     gadget.idVendor  = '0x1d6b' # Linux Foundation
     gadget.idProduct = '0x0104' # Multifunction Composite Gadget
     gadget.bcdDevice = '0x0100' # V1.0.0
@@ -41,7 +60,18 @@ def setup_gadget(device_name: str = 'g1', root: Path = Path('/')) -> USBGadget:
     config.MaxPower = '250'
     config['strings'][_EN_US].configuration = 'Config 1: ECM network'
 
-    return gadget
+    functions: typing.List[USBFunction] = []
+    for section in cfg.sections():
+        tokens = section.split('.')
+        if tokens[0] == 'function':
+            name = tokens[-1]
+            typename = '.'.join(tokens[:-1])
+            ty = _import_type(f'ezmsg.gadget:{typename}')
+            function = ty(gadget, name, **cfg[section])
+            gadget.link(function, config)
+            functions.append(function)
+
+    return gadget, functions
 
 def load_config(config_path: typing.Optional[Path] = None) -> ConfigParser:
 

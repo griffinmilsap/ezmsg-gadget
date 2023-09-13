@@ -16,7 +16,7 @@ def test_enumerate():
         gadget_path = root / _GADGET_PATH
         gadget_path.mkdir(parents = True, exist_ok = False)
 
-        gadget = setup_gadget(root = root)
+        gadget, _ = setup_gadget(root = root)
 
         gadget.activate('usb0')
 
