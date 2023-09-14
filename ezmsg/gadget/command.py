@@ -128,6 +128,7 @@ def enumerate(config_path: typing.Optional[Path] = None) -> None:
     # Change permissions of associated HID devices
     for function in functions:
         if isinstance(function, HIDFunction):
+            ez.logger.info(f'Changing permissions on {function.device=}')
             subprocess.run(['chmod', '777', function.device], shell = True)
 
 
