@@ -128,12 +128,12 @@ def enumerate(config_path: typing.Optional[Path] = None) -> None:
     # Change permissions of associated HID devices
     for function in functions:
         if isinstance(function, HIDFunction):
-            subprocess.run(['chgrp', 'input', function.device], shell = True)
+            subprocess.run(['chmod', '777', function.device], shell = True)
 
 
 def deactivate(config_path: typing.Optional[Path] = None) -> None:
 
-    gadget, _ = setup_gadget(config_path = config_path)
+    gadget, _ = setup_gadget(config_path = config_path, setup_functions = False)
 
     ez.logger.info('Deactivating Gadget')
     gadget.deactivate()

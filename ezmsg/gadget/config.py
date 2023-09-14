@@ -26,6 +26,7 @@ def _import_type(typestr: str) -> typing.Type[USBFunction]:
 
 def setup_gadget(
         config_path: typing.Optional[Path] = None, 
+        setup_functions: bool = True,
         root: Path = Path('/')
     ) -> typing.Tuple[USBGadget, typing.List[USBFunction]]:
     
