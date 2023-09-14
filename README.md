@@ -66,7 +66,7 @@ The configuration of this module can be done using `/etc/ezmsg-gadget.conf` whic
 ``` ini
 # configuration for ezmsg-gadget
 [device]
-name = 'g1' # generally unimportant
+name = g1 # generally unimportant
 
 [endpoint]
 # ezmsg-gadget has optional distributed ezmsg functionality
