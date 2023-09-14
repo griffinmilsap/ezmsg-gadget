@@ -27,12 +27,8 @@ def _import_type(typestr: str) -> typing.Type[USBFunction]:
 def setup_gadget(
         config_path: typing.Optional[Path] = None, 
         setup_functions: bool = True,
-        root: Path = Path('/')
+        gadget_path: Path = _GADGET_PATH
     ) -> typing.Tuple[USBGadget, typing.Dict[str, USBFunction]]:
-    
-    # Ability to change root mostly here for unit testing.
-    # TODO: Find a way to expose this functionality without adding a keyword arg. Environment variable?
-    gadget_path = root / _GADGET_PATH
 
     if not gadget_path.exists():
         raise ValueError("Filesystem does not contain usb_gadget configfs")
@@ -80,7 +76,7 @@ def setup_gadget(
 def load_config(config_path: typing.Optional[Path] = None) -> ConfigParser:
 
     if config_path is None:
-        config_path = _CONFIG_PATH
+        config_path = Path('/') / _CONFIG_PATH
 
     config_files = []
     if config_path.exists() and config_path.is_file():

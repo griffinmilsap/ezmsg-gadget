@@ -1,0 +1,14 @@
+[Unit]
+Description=Initialize ezmsg-gadget USB gadgets
+After=syslog.target
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=python -m ezmsg.gadget.command activate
+RemainAfterExit=true
+ExecStop=python -m ezmsg.gadget.command deactivate
+StandardOutput=journal
+
+[Install]
+WantedBy=local-fs.target

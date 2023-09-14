@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
     mouse_device = HIDDevice(
         HIDDeviceSettings(
-            function_name = 'mouse_rel'
+            function_name = 'mouse0'
         )
     )
 

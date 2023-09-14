@@ -1,15 +1,15 @@
-import os
 import tempfile
 
 from pathlib import Path
 
 import pytest
 
-from ezmsg.gadget.command import (
+from ezmsg.gadget.install import (
     install, 
     uninstall,
     _MODULES_DIR,
-    _SERVICE_DIR
+    _SERVICE_DIR,
+    _CONFIG_DIR
 )
 
 def test_install():
@@ -21,11 +21,13 @@ def test_install():
         _MODULES_DIR(root).mkdir(parents = True, exist_ok = False)
         _SERVICE_DIR(root).mkdir(parents = True, exist_ok = False)
 
-        install(root, service = True, yes = True)
+        install(root, endpoint_service = True, yes = True)
 
         # TODO: Actually check the temp file system
 
         uninstall(root, yes = True)
+
+        # TODO: Actually check the temp file system is EMPTY
 
 if __name__ == '__main__':
     test_install()
