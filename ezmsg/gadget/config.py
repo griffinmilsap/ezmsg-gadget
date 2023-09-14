@@ -65,8 +65,9 @@ def setup_gadget(
         tokens = section.split('.')
         if tokens[0] == 'function':
             name = tokens[-1]
-            typename = '.'.join(tokens[:-1])
-            ty = _import_type(f'ezmsg.gadget:{typename}')
+            function_classname = tokens[-2]
+            module = '.'.join(['ezmsg', 'gadget'] + tokens[:-2])
+            ty = _import_type(f'{module}:{function_classname}')
             function = ty(gadget, name, **cfg[section])
             gadget.link(function, config)
             functions.append(function)
