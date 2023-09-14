@@ -129,7 +129,7 @@ def activate(config_path: typing.Optional[Path] = None) -> None:
     for fn_name, function in functions.items():
         if isinstance(function, HIDFunction):
             ez.logger.info(f'Changing permissions on {fn_name} -> {function.device}')
-            subprocess.run(['chmod', '777', function.device], shell = True)
+            subprocess.run(f'chmod 777 {function.device}', shell = True)
 
 
 def deactivate(config_path: typing.Optional[Path] = None) -> None:
