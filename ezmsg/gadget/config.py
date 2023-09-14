@@ -62,16 +62,18 @@ def setup_gadget(
     config['strings'][_EN_US].configuration = 'Config 1: ECM network'
 
     functions: typing.List[USBFunction] = []
-    for section in cfg.sections():
-        tokens = section.split('.')
-        if tokens[0] == 'function':
-            name = tokens[-1]
-            function_classname = tokens[-2]
-            module = '.'.join(['ezmsg', 'gadget'] + tokens[:-2])
-            ty = _import_type(f'{module}:{function_classname}')
-            function = ty(gadget, name, **cfg[section])
-            gadget.link(function, config)
-            functions.append(function)
+
+    if setup_functions:
+        for section in cfg.sections():
+            tokens = section.split('.')
+            if tokens[0] == 'function':
+                name = tokens[-1]
+                function_classname = tokens[-2]
+                module = '.'.join(['ezmsg', 'gadget'] + tokens[:-2])
+                ty = _import_type(f'{module}:{function_classname}')
+                function = ty(gadget, name, **cfg[section])
+                gadget.link(function, config)
+                functions.append(function)
 
     return gadget, functions
 
