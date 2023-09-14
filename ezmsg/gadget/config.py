@@ -28,7 +28,7 @@ def setup_gadget(
         config_path: typing.Optional[Path] = None, 
         setup_functions: bool = True,
         root: Path = Path('/')
-    ) -> typing.Tuple[USBGadget, typing.List[USBFunction]]:
+    ) -> typing.Tuple[USBGadget, typing.Dict[str, USBFunction]]:
     
     # Ability to change root mostly here for unit testing.
     # TODO: Find a way to expose this functionality without adding a keyword arg. Environment variable?
@@ -61,7 +61,7 @@ def setup_gadget(
     config.MaxPower = '250'
     config['strings'][_EN_US].configuration = 'Config 1: ECM network'
 
-    functions: typing.List[USBFunction] = []
+    functions: typing.Dict[str, USBFunction] = {}
 
     if setup_functions:
         for section in cfg.sections():
@@ -73,7 +73,7 @@ def setup_gadget(
                 ty = _import_type(f'{module}:{function_classname}')
                 function = ty(gadget, name, **cfg[section])
                 gadget.link(function, config)
-                functions.append(function)
+                functions[name] = function
 
     return gadget, functions
 

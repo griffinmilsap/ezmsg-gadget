@@ -118,7 +118,7 @@ def uninstall(root: Path = Path('/'), yes: bool = False) -> None:
     ez.logger.info("ezmsg-gadget uninstall completed.  reboot encouraged.")
 
 
-def enumerate(config_path: typing.Optional[Path] = None) -> None:
+def activate(config_path: typing.Optional[Path] = None) -> None:
 
     gadget, functions = setup_gadget(config_path = config_path)
 
@@ -126,9 +126,9 @@ def enumerate(config_path: typing.Optional[Path] = None) -> None:
     gadget.activate()
 
     # Change permissions of associated HID devices
-    for function in functions:
+    for fn_name, function in functions.items():
         if isinstance(function, HIDFunction):
-            ez.logger.info(f'Changing permissions on {function.device=}')
+            ez.logger.info(f'Changing permissions on {fn_name} -> {function.device}')
             subprocess.run(['chmod', '777', function.device], shell = True)
 
 
@@ -152,7 +152,7 @@ def cmdline() -> None:
 
     parser.add_argument(
         'command',
-        choices = ['enumerate', 'deactivate', 'install', 'uninstall']
+        choices = ['activate', 'deactivate', 'install', 'uninstall']
     )
 
     parser.add_argument(
@@ -175,10 +175,10 @@ def cmdline() -> None:
 
     args = parser.parse_args(namespace = Args)
 
-    if args.command in ['enumerate', 'deactivate', 'install', 'uninstall']:
+    if args.command in ['activate', 'deactivate', 'install', 'uninstall']:
         try:
-            if args.command == 'enumerate':
-                enumerate(args.config)
+            if args.command == 'activate':
+                activate(args.config)
             elif args.command == 'deactivate':
                 deactivate(args.config)
 
