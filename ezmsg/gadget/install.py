@@ -59,8 +59,8 @@ def install(
         if _confirm_prompt(f'Write {BOOT_SERVICE_FILE} to {service_dir}', yes):
             with open(service_dir / BOOT_SERVICE_FILE, 'w') as f:
                 f.write(data_files.joinpath(BOOT_SERVICE_FILE).read_text())
-            if _confirm_prompt('Issue "systemctl daemon reload"', yes):
-                subprocess.run('systemctl daemon reload', shell = True)
+            if _confirm_prompt('Issue "systemctl daemon-reload"', yes):
+                subprocess.run('systemctl daemon-reload', shell = True)
 
     # ENABLE BOOT SERVICE
     result = subprocess.run(
@@ -90,8 +90,8 @@ def install(
         if _confirm_prompt(f'Write {ENDPOINT_SERVICE_FILE} to {service_dir}', yes):
             with open(service_dir / ENDPOINT_SERVICE_FILE, 'w') as f:
                 f.write(data_files.joinpath(ENDPOINT_SERVICE_FILE).read_text())
-                if _confirm_prompt('Issue "systemctl daemon reload"', yes):
-                    subprocess.run('systemctl daemon reload', shell = True)
+                if _confirm_prompt('Issue "systemctl daemon-reload"', yes):
+                    subprocess.run('systemctl daemon-reload', shell = True)
 
     # ENABLE ENDPOINT SERVICE
     result = subprocess.run(
@@ -138,8 +138,8 @@ def uninstall(root: Path = Path('/'), yes: bool = False) -> None:
             service.unlink()
             daemon_reload = True
 
-    if daemon_reload and _confirm_prompt('Issue "systemctl daemon reload"', yes):
-        subprocess.run('systemctl daemon reload', shell = True)
+    if daemon_reload and _confirm_prompt('Issue "systemctl daemon-reload"', yes):
+        subprocess.run('systemctl daemon-reload', shell = True)
 
     modules_dir: Path = _MODULES_DIR(root)
     config_dir: Path = _CONFIG_DIR(root)
