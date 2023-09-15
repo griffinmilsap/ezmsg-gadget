@@ -22,8 +22,8 @@ This library was created with Raspberry Pi devices in mind.  It may be possible 
 Note that in the script above, ezmsg-gadget is installed to __system__ Python, using `pip install` as superuser.  This is because `ezmsg-gadget activate` must be executed as `root`, and the `systemd` service files that the installer places involve running code from `ezmsg-gadget` _as root during boot_.  
 
 ## Uninstall
-```
-sudo su
+Again, __AS SUPERUSER__ (`sudo su`):
+``` bash
 ezmsg-gadget uninstall
 ```
 
@@ -102,7 +102,7 @@ dev_addr = 60:6D:3C:3E:0C:6B
 ```
 
 ## Ethernet Setup
-One of the available gadget devices this extension can create is a virtual ethernet device.  By default, this will enumerate locally as `usb0` and on a fresh install of raspbian, it will come up with a link-local address.  
+One of the available functions this extension can enable is a virtual ethernet device.  By default, this will enumerate locally as `usb0` and on a fresh install of raspbian, it will come up with a link-local address.  
 
 ### Static IP
 It can be handy to assign a static IP address to this new interface.  To do this:
