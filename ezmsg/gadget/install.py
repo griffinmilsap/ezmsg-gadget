@@ -75,12 +75,12 @@ def install(
                 _run_command('systemctl daemon-reload', test_result = b'' if test else None)
 
     # ENABLE BOOT SERVICE
+    print('Checking if boot service is enabled...')
     boot_service_result = _run_command(
         f'systemctl is-enabled {BOOT_SERVICE_FILE}', 
         test_result = b'enabled' if test else None
     )
-
-    print(f'{boot_service_result=}')
+    print(f'Boot service status: {boot_service_result}')
 
     # CHECK IF BOOT SERVICE ENABLED
     if boot_service_result == b'enabled':
