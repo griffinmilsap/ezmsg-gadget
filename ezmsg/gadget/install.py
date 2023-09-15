@@ -171,14 +171,11 @@ def uninstall(root: Path = Path('/'), yes: bool = False, test: bool = False) -> 
     if daemon_reload and _confirm_prompt('Issue "systemctl daemon-reload"', yes):
         _run_command('systemctl daemon-reload', test_result = b'' if test else None)
 
-    user_exists_result = _run_command('id ezmsg-gadget', 
-        test_result = b'id: `ezmsg-gadget`: no such user' if test else None )
+    user_exists = not(_run_command('grep ezmsg-gadget /etc/passwd', 
+        test_result = b'' if test else None))
 
-    user_exists = not(b'no such user' in user_exists_result)
-
-    if user_exists:
-        if _confirm_prompt('Remove user: ezmsg-gadget', yes):
-            _run_command('userdel ezmsg-gadget', test_result = b'' if test else None)
+    if user_exists and _confirm_prompt('Remove user: ezmsg-gadget', yes):
+        _run_command('userdel ezmsg-gadget', test_result = b'' if test else None)
 
     modules_dir: Path = _MODULES_DIR(root)
     config_dir: Path = _CONFIG_DIR(root)
