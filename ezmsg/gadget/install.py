@@ -113,10 +113,12 @@ def install(
                     _run_command('systemctl daemon-reload', test_result = b'' if test else None)
 
         # ENABLE ENDPOINT SERVICE
+        print('Checking if endpoint service is enabled...')
         endpoint_service_result = _run_command(
             f'systemctl is-enabled {ENDPOINT_SERVICE_FILE}', 
             test_result = b'enabled' if test else None
         )
+        print(f'Endpoint service status: {endpoint_service_result}')
 
         # CHECK IF ENDPOINT SERVICE ENABLED
         if endpoint_service_result == b'enabled':
@@ -147,7 +149,7 @@ def uninstall(root: Path = Path('/'), yes: bool = False, test: bool = False) -> 
         if service.exists():
             if _confirm_prompt(f'Stop {service.name}', yes):
                 _run_command(
-                    f'systemctl stop {ENDPOINT_SERVICE_FILE}', 
+                    f'systemctl stop {service.name}', 
                     test_result = b'' if test else None
                 )
 
@@ -158,7 +160,7 @@ def uninstall(root: Path = Path('/'), yes: bool = False, test: bool = False) -> 
 
             if service_enabled_result == b'enabled' and _confirm_prompt(f'Disable {service.name}', yes):
                 _run_command(
-                    f'systemctl disable {ENDPOINT_SERVICE_FILE}', 
+                    f'systemctl disable {service.name}', 
                     test_result = b'' if test else None
                 )
 
