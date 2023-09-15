@@ -44,11 +44,11 @@ def install(
     modules_dir = _MODULES_DIR(root)
 
     if _confirm_prompt(f'Add dwc2 to {modules_dir}', yes):
-        with open(modules_dir / 'dwc2', 'w') as f:
+        with open(modules_dir / 'dwc2.conf', 'w') as f:
             f.write('dwc2')
 
     if _confirm_prompt(f'Add libcomposite to {modules_dir}', yes):
-        with open(modules_dir / 'libcomposite', 'w') as f:
+        with open(modules_dir / 'libcomposite.conf', 'w') as f:
             f.write('libcomposite')
 
     data_files = files('ezmsg.gadget')
@@ -179,8 +179,8 @@ def uninstall(root: Path = Path('/'), yes: bool = False, test: bool = False) -> 
 
     # REMOVE ALL OTHER INSTALLED FILES
     files = services + [
-        modules_dir / 'dwc2',
-        modules_dir / 'libcomposite',
+        modules_dir / 'dwc2.conf',
+        modules_dir / 'libcomposite.conf',
         config_dir / CONFIG_FILE
     ]
 
