@@ -1,6 +1,7 @@
 import argparse
 import typing
 import subprocess
+import traceback
 
 from pathlib import Path
 
@@ -47,10 +48,15 @@ def endpoint(config_path: typing.Optional[Path] = None) -> None:
                 )
             )
     
-    ez.run(
-        components = devices,
-        graph_address = config.endpoint_remote_addr
-    )
+    try:
+        ez.run(
+            components = devices,
+            graph_address = config.endpoint_remote_addr
+        )
+    except OSError:
+        ez.logger.warning('Failed to connect to GraphServer')
+        traceback.print_exc()
+        
 
 def cmdline() -> None:
 
