@@ -18,8 +18,7 @@ def _run_command(cmd: str, test_result: typing.Optional[bytes] = None) -> bytes:
     if test_result is None:
         process = Popen(cmd, stdout = PIPE, stderr = PIPE, shell = True)
         stdout, stderr = process.communicate()
-        if stderr:
-            print(f'Error Output: {stderr}')
+        if stderr: print(stderr.strip())
         return stdout.strip()
     else:
         print(f'TEST -- NOT Running "{cmd}", assuming result: {test_result}')
@@ -145,20 +144,27 @@ def uninstall(root: Path = Path('/'), yes: bool = False, test: bool = False) -> 
 
     daemon_reload = False
     for service in services:
-        service_result = _run_command(
-            f'systemctl is-enabled {service.name}', 
-            test_result = b'enabled' if test else None
-        )
+        if service.exists():
+            if _confirm_prompt(f'Stop {service.name}', yes):
+                _run_command(
+                    f'systemctl stop {ENDPOINT_SERVICE_FILE}', 
+                    test_result = b'' if test else None
+                )
 
-        if service_result == b'enabled' and _confirm_prompt(f'Disable {service.name}', yes):
-            _run_command(
-                f'systemctl disable {ENDPOINT_SERVICE_FILE}', 
-                test_result = b'' if test else None
+            service_enabled_result = _run_command(
+                f'systemctl is-enabled {service.name}', 
+                test_result = b'enabled' if test else None
             )
 
-        if service.exists() and _confirm_prompt(f'Remove {service}', yes):
-            service.unlink()
-            daemon_reload = True
+            if service_enabled_result == b'enabled' and _confirm_prompt(f'Disable {service.name}', yes):
+                _run_command(
+                    f'systemctl disable {ENDPOINT_SERVICE_FILE}', 
+                    test_result = b'' if test else None
+                )
+
+            if _confirm_prompt(f'Remove {service}', yes):
+                service.unlink()
+                daemon_reload = True
 
     if daemon_reload and _confirm_prompt('Issue "systemctl daemon-reload"', yes):
         _run_command('systemctl daemon-reload', test_result = b'' if test else None)
