@@ -1,14 +1,15 @@
 [Unit]
-Description=Initialize ezmsg-gadget USB gadgets
-After=syslog.target
+Description=Start an ezmsg-gadget endpoint
+Wants=ezmsg-gadget.service
+After=network.target ezmsg-gadget.service
 
 [Service]
-Type=oneshot
-User=root
-ExecStart=/opt/gadget-priveliged/init-usb-gadget
-RemainAfterExit=true
-ExecStop=/opt/gadget-priveliged/remove-usb-gadget
+Type=simple
+User=ezmsg-gadget
+ExecStart=python -m ezmsg.gadget.command endpoint
 StandardOutput=journal
+Restart=on-success
+RestartSec=5
 
 [Install]
-WantedBy=local-fs.target
+WantedBy=multi-user.target

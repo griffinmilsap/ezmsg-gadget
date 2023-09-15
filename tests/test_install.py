@@ -21,11 +21,11 @@ def test_install():
         _MODULES_DIR(root).mkdir(parents = True, exist_ok = False)
         _SERVICE_DIR(root).mkdir(parents = True, exist_ok = False)
 
-        install(root, endpoint_service = True, yes = True)
+        install(root, endpoint_service = True, yes = True, test = True)
 
         # TODO: Actually check the temp file system
 
-        uninstall(root, yes = True)
+        uninstall(root, yes = True, test = True)
 
         # TODO: Actually check the temp file system is EMPTY
 

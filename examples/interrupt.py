@@ -1,7 +1,5 @@
 import typing
 
-from pathlib import Path
-
 import ezmsg.core as ez
 
 from ezmsg.gadget.function import Keyboard
