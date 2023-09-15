@@ -20,7 +20,7 @@ def _run_command(cmd: str, test_result: typing.Optional[bytes] = None) -> bytes:
         stdout, stderr = process.communicate()
         if stderr:
             print(f'Error Output: {stderr}')
-        return stdout
+        return stdout.strip()
     else:
         print(f'TEST -- NOT Running "{cmd}", assuming result: {test_result}')
         return test_result
