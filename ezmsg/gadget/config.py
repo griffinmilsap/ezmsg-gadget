@@ -9,9 +9,10 @@ from pathlib import Path
 
 from usb_gadget import USBGadget, USBFunction
 
-_CONFIG_ENV = 'EZMSG_GADGET_CONFIG'
-_CONFIG_PATH = Path(os.environ.get(_CONFIG_ENV, '/etc/ezmsg-gadget.conf'))
-_GADGET_PATH = Path('/sys/kernel/config/usb_gadget')
+CONFIG_ENV = 'EZMSG_GADGET_CONFIG'
+CONFIG_PATH = Path(os.environ.get(CONFIG_ENV, '/etc/ezmsg-gadget.conf'))
+GADGET_PATH = Path('/sys/kernel/config/usb_gadget')
+
 _EN_US = '0x409'
 
 def _import_type(typestr: str) -> typing.Type[USBFunction]:
@@ -24,22 +25,72 @@ def _import_type(typestr: str) -> typing.Type[USBFunction]:
 
     return ty
 
+function_definition = typing.Dict[
+    str, 
+    typing.Tuple[
+        typing.Type[USBFunction], 
+        typing.Dict[str, str]
+    ]
+]
+
+class GadgetConfig:
+
+    parser: ConfigParser
+
+    def __init__(self, config_path: typing.Optional[Path] = None):
+        if config_path is None:
+            config_path = Path('/') / CONFIG_PATH
+
+        config_files = []
+        if config_path.exists() and config_path.is_file():
+            config_files.append(config_path)
+        config_dir = config_path.with_suffix('.d')
+        if config_dir.exists() and config_dir.is_dir():
+            for fname in config_dir.glob('*'):
+                config_files.append(fname)
+
+        self.parser = ConfigParser()
+        self.parser.read(config_files)
+
+    @property
+    def gadget_name(self) -> str:
+        return self.parser.get('gadget', 'name', fallback = 'g1')
+    
+    @property
+    def endpoint_remote_addr(self) -> typing.Tuple[str, int]:
+        remote_host = self.parser.get('endpoint', 'remote_host', fallback = 'localhost')
+        remote_port = int(self.parser.get('endpoint', 'remote_port', fallback = '25978'))
+        return remote_host, remote_port
+    
+    @property
+    def functions(self) -> function_definition:
+        functions: function_definition = {}
+
+        for section in self.parser.sections():
+            tokens = section.split('.')
+            if tokens[0] == 'function':
+                name = tokens[-1]
+                function_classname = tokens[-2]
+                module = '.'.join(['ezmsg', 'gadget'] + tokens[:-2])
+                ty = _import_type(f'{module}:{function_classname}')
+                functions[name] = (ty, dict(**self.parser[section]))
+
+        return functions
+
 def setup_gadget(
         config_path: typing.Optional[Path] = None, 
         setup_functions: bool = True,
-        gadget_path: Path = _GADGET_PATH
+        gadget_path: Path = GADGET_PATH
     ) -> typing.Tuple[USBGadget, typing.Dict[str, USBFunction]]:
 
     if not gadget_path.exists():
         raise ValueError("Filesystem does not contain usb_gadget configfs")
     
-    # Parse Config
-    cfg = load_config(config_path)
-    device_name = cfg.get('device', 'name', fallback = 'g1')
-    # TODO: A lot more of this info could be brought in from the config file
+    cfg = GadgetConfig(config_path)
 
     # Create gadget and set IDs
-    gadget = USBGadget(device_name, path = str(gadget_path))
+    # TODO: A lot more of this info could be brought in from the config file
+    gadget = USBGadget(cfg.gadget_name, path = str(gadget_path))
     gadget.idVendor  = '0x1d6b' # Linux Foundation
     gadget.idProduct = '0x0104' # Multifunction Composite Gadget
     gadget.bcdDevice = '0x0100' # V1.0.0
@@ -60,33 +111,9 @@ def setup_gadget(
     functions: typing.Dict[str, USBFunction] = {}
 
     if setup_functions:
-        for section in cfg.sections():
-            tokens = section.split('.')
-            if tokens[0] == 'function':
-                name = tokens[-1]
-                function_classname = tokens[-2]
-                module = '.'.join(['ezmsg', 'gadget'] + tokens[:-2])
-                ty = _import_type(f'{module}:{function_classname}')
-                function = ty(gadget, name, **cfg[section])
-                gadget.link(function, config)
-                functions[name] = function
+        for fn_name, (fn_type, kwargs) in cfg.functions.items():
+            function = fn_type(gadget, fn_name, **kwargs)
+            gadget.link(function, config)
+            functions[fn_name] = function
 
     return gadget, functions
-
-def load_config(config_path: typing.Optional[Path] = None) -> ConfigParser:
-
-    if config_path is None:
-        config_path = Path('/') / _CONFIG_PATH
-
-    config_files = []
-    if config_path.exists() and config_path.is_file():
-        config_files.append(config_path)
-    config_dir = config_path.with_suffix('.d')
-    if config_dir.exists() and config_dir.is_dir():
-        for fname in config_dir.glob('*'):
-            config_files.append(fname)
-
-    config = ConfigParser()
-    config.read(config_files)
-
-    return config

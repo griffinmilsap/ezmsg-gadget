@@ -45,7 +45,7 @@ def install(
     # ADD CONFIG FILE
     config_dir = _CONFIG_DIR(root)
     config_file = 'ezmsg-gadget.conf'
-    if _confirm_prompt(f'Add {config_file} to {config_dir}'):
+    if _confirm_prompt(f'Add {config_file} to {config_dir}', yes):
         with open(config_dir / config_file, 'w') as config_f:
             config_f.write(data_files.joinpath(config_file).read_text())
     
