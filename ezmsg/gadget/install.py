@@ -80,6 +80,8 @@ def install(
         test_result = b'enabled' if test else None
     )
 
+    print(f'{boot_service_result=}')
+
     # CHECK IF BOOT SERVICE ENABLED
     if boot_service_result == b'enabled':
         print('Boot service enabled')
