@@ -1,3 +1,4 @@
+import sys
 import argparse
 import typing
 import subprocess
@@ -56,6 +57,7 @@ def endpoint(config_path: typing.Optional[Path] = None) -> None:
     except OSError:
         ez.logger.warning('Failed to connect to GraphServer')
         traceback.print_exc()
+        sys.exit()
         
 
 def cmdline() -> None:
