@@ -13,20 +13,25 @@ Sometimes we want the capability to control other devices from an `ezmsg` system
 This library was created with Raspberry Pi devices in mind.  It may be possible to use this library with non-raspberry pi devices, but your mileage may vary!
 
 1. At the bottom of your /boot/config.txt file, after `[all]`, add `dtoverlay=dwc2` to enable usb gadget mode.
-2. 
+2. Run the following commands __AS SUPERUSER__ (`sudo su`)
     ``` bash
-    git clone https://github.com/griffinmilsap/ezmsg-gadget.git
-    pip install -e ./ezmsg-gadget
-
-    # Configures OS for ezmsg-gadget functionality
-    sudo python -m ezmsg.gadget.command install --install-endpoint-service 
-    sudo reboot
+    pip install git+https://github.com/griffinmilsap/ezmsg-gadget.git
+    ezmsg-gadget install --install-endpoint-service -y
+    reboot
     ```
+Note that in the script above, ezmsg-gadget is installed to __system__ Python, using `pip install` as superuser.  This is because `ezmsg-gadget activate` must be executed as `root`, and the `systemd` service files that the installer places involve running code from `ezmsg-gadget` _as root during boot_.  
 
 ## Uninstall
-    ```
-    sudo python -m ezmsg.gadget.command uninstall
-    ```
+```
+sudo su
+ezmsg-gadget uninstall
+```
+
+Because we have to install `ezmsg-gadget` as root to the system Python installation, uninstall is a little tricky.  A simple `pip uninstall ezmsg-gadget` fails because of the special install location.  Currently, the only workaround is to manually uninstall by deleting:
+
+* `/usr/local/lib/python3.9/dist-packages/ezmsg/gadget`
+* `/usr/local/lib/python3.9/dist-packages/ezmsg-gadget_[X.Y.Z].dist-info`
+* `/usr/local/bin/ezmsg-gadget`
 
 # Usage
 __`ezmsg-gadget` has two functions:__
@@ -65,14 +70,15 @@ This is a somewhat complicated extension and requires some extra configuration t
 The configuration of this module can be done using `/etc/ezmsg-gadget.conf` which has the following format:
 ``` ini
 # configuration for ezmsg-gadget
-[device]
-name = g1 # generally unimportant
+[gadget]
+name = g1
 
 [endpoint]
 # ezmsg-gadget has optional distributed ezmsg functionality
 # to spin up a service that connects to a remote graphserver
 # and exposes topics for HID-gadget manipulation
-hostname = localhost
+remote_host = localhost
+remote_port = 25978
 
 # function section format is [function.[Class].[name]]
 # * [Class] will resolve to ezmsg.gadget.function.Class 
@@ -88,7 +94,7 @@ hostname = localhost
 
 [function.Ethernet.usb0]
 # some functions have additional parameters that you can
-# add in the section here [see below for more MAC info]
+# add in the section here
 host_addr = 60:6D:3C:3E:0C:7B
 dev_addr = 60:6D:3C:3E:0C:6B
 
