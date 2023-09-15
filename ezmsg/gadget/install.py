@@ -111,23 +111,23 @@ def install(
                 if _confirm_prompt('Issue "systemctl daemon-reload"', yes):
                     _run_command('systemctl daemon-reload', test_result = b'' if test else None)
 
-    # ENABLE ENDPOINT SERVICE
-    endpoint_service_result = _run_command(
-        f'systemctl is-enabled {ENDPOINT_SERVICE_FILE}', 
-        test_result = b'enabled' if test else None
-    )
+        # ENABLE ENDPOINT SERVICE
+        endpoint_service_result = _run_command(
+            f'systemctl is-enabled {ENDPOINT_SERVICE_FILE}', 
+            test_result = b'enabled' if test else None
+        )
 
-    # CHECK IF ENDPOINT SERVICE ENABLED
-    if endpoint_service_result == b'enabled':
-        print('Endpoint service enabled')
-    elif endpoint_service_result == b'disabled':
-        if endpoint_service and _confirm_prompt(f'Enable {ENDPOINT_SERVICE_FILE}', yes):
-            _run_command(
-                f'systemctl enable {ENDPOINT_SERVICE_FILE}', 
-                test_result = b'' if test else None
-            )
-    else:
-        print('Endpoint service not installed or enabled')
+        # CHECK IF ENDPOINT SERVICE ENABLED
+        if endpoint_service_result == b'enabled':
+            print('Endpoint service enabled')
+        elif endpoint_service_result == b'disabled':
+            if endpoint_service and _confirm_prompt(f'Enable {ENDPOINT_SERVICE_FILE}', yes):
+                _run_command(
+                    f'systemctl enable {ENDPOINT_SERVICE_FILE}', 
+                    test_result = b'' if test else None
+                )
+        else:
+            print('Endpoint service not installed or enabled')
 
     print("Install completed.  Reboot encouraged.")
 
