@@ -10,7 +10,7 @@ from ezmsg.gadget.hiddevice import HIDDevice, HIDDeviceSettings
 from ezmsg.gadget.function import Touch
 
 class TouchMessageGeneratorSettings(ez.Settings):
-    pub_rate: float = 10 # Hz
+    pub_rate: float = 60 # Hz
 
 class TouchMessageGenerator(ez.Unit):
     SETTINGS: TouchMessageGeneratorSettings
