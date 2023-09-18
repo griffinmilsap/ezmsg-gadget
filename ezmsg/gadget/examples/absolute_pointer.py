@@ -31,6 +31,7 @@ class TouchMessageGenerator(ez.Unit):
             mag = (np.cos(0.5 * w) + 1.0) / 2.0
             cpx = np.exp(w * 1.0j) * mag
             yield self.OUTPUT, Touch.Message(
+                touch = 0x02,
                 absolute_x = (cpx.real + 1.0) / 2.0,
                 absolute_y = (cpx.imag + 1.0) / 2.0
             )
