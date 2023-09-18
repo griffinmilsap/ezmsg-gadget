@@ -7,15 +7,15 @@ import numpy as np
 import ezmsg.core as ez
 
 from ezmsg.gadget.hiddevice import HIDDevice, HIDDeviceSettings
-from ezmsg.gadget.function import Mouse
+from ezmsg.gadget.function import Touch
 
-class MouseMessageGeneratorSettings(ez.Settings):
+class TouchMessageGeneratorSettings(ez.Settings):
     pub_rate: float = 10 # Hz
 
-class MouseMessageGenerator(ez.Unit):
-    SETTINGS: MouseMessageGeneratorSettings
+class TouchMessageGenerator(ez.Unit):
+    SETTINGS: TouchMessageGeneratorSettings
 
-    OUTPUT = ez.OutputStream(Mouse.Message)
+    OUTPUT = ez.OutputStream(Touch.Message)
 
     @ez.publisher(OUTPUT)
     async def output_mouse(self) -> typing.AsyncGenerator:
@@ -30,26 +30,26 @@ class MouseMessageGenerator(ez.Unit):
             w = 2.0 * math.pi * 2.0 * time.time()
             mag = (np.cos(0.5 * w) + 1.0) / 2.0
             cpx = np.exp(w * 1.0j) * mag
-            yield self.OUTPUT, Mouse.Message(
+            yield self.OUTPUT, Touch.Message(
                 relative_x = (cpx.real + 1.0) / 2.0,
                 relative_y = (cpx.imag + 1.0) / 2.0
             )
 
 if __name__ == '__main__':
 
-    generator = MouseMessageGenerator()
+    generator = TouchMessageGenerator()
 
-    mouse_device = HIDDevice(
+    touch_device = HIDDevice(
         HIDDeviceSettings(
-            function_name = 'mouse0'
+            function_name = 'touch0'
         )
     )
 
     ez.run(
         GENERATOR = generator,
-        MOUSE_DEVICE = mouse_device,
+        MOUSE_DEVICE = touch_device,
         connections = (
-            (generator.OUTPUT, mouse_device.INPUT_HID),
+            (generator.OUTPUT, touch_device.INPUT_HID),
         )
     )
 
