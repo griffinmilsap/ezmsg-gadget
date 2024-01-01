@@ -11,7 +11,7 @@ from usb_gadget import HIDFunction
 
 from .config import GadgetConfig, setup_gadget
 from .install import install, uninstall
-from .hiddevice import HIDDevice, HIDDeviceSettings
+from .hiddevice import hid_devices
 
 def activate(config_path: typing.Optional[Path] = None) -> None:
 
@@ -38,16 +38,7 @@ def deactivate(config_path: typing.Optional[Path] = None) -> None:
 
 def endpoint(config_path: typing.Optional[Path] = None) -> None:
     config = GadgetConfig(config_path)
-
-    devices: typing.Dict[str, HIDDevice] = {}
-    for function, (function_type, _) in config.functions.items():
-        if issubclass(function_type, HIDFunction):
-            devices[function] = HIDDevice(
-                HIDDeviceSettings(
-                    function_name = function, 
-                )
-            )
-
+    devices = hid_devices(config)
     ez.logger.info(f'Starting ezmsg graph with {devices=}')
 
     try:

@@ -8,6 +8,7 @@ import ezmsg.core as ez
 
 from aiofile import async_open, BinaryFileWrapper
 from ezmsg.gadget.config import USBGadget, GadgetConfig
+from usb_gadget import HIDFunction
 
 
 class HIDMessage(abc.ABC):
@@ -52,3 +53,14 @@ class HIDDevice(ez.Unit):
     async def write(self, msg: HIDMessage) -> None:
         await self.STATE.handle.write(msg.report())
         
+        
+def hid_devices(config: GadgetConfig) -> typing.Dict[str, HIDDevice]:
+    devices: typing.Dict[str, HIDDevice] = {}
+    for function, (function_type, _) in config.functions.items():
+        if issubclass(function_type, HIDFunction):
+            devices[function] = HIDDevice(
+                HIDDeviceSettings(
+                    function_name = function, 
+                )
+            )
+    return devices
