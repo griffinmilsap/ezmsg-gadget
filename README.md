@@ -23,9 +23,14 @@ This library was created with Raspberry Pi devices in mind.  It may be possible 
             ```
 2. Run the following commands __AS SUPERUSER__ (`sudo su`)
     ``` bash
-    pip install git+https://github.com/griffinmilsap/ezmsg-gadget.git
-    ezmsg-gadget install --install-endpoint-service -y
-    reboot
+    $ sudo su
+    # cd /root
+    # python -m venv ezmsg-gadget-env
+    # source ezmsg-gadget-env/bin/activate
+    (ezmsg-gadget-env) # pip install --upgrade pip
+    (ezmsg-gadget-env) # pip install git+https://github.com/griffinmilsap/ezmsg-gadget.git
+    (ezmsg-gadget-env) # ezmsg-gadget install --install-endpoint-service -y
+    # reboot
     ```
 Note that in the script above, ezmsg-gadget is installed to __system__ Python, using `pip install` as superuser.  This is because `ezmsg-gadget activate` must be executed as `root`, and the `systemd` service files that the installer places involve running code from `ezmsg-gadget` _as root during boot_.  
 
