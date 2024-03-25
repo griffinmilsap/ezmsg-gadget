@@ -21,8 +21,8 @@ This library was created with Raspberry Pi devices in mind.  It may be possible 
             [all]
             dtoverlay=dwc2,dr_mode=peripheral
             ```
-2. Run the following commands __AS SUPERUSER__ (`sudo su`)
-    ``` bash
+2. Run the following commands:
+    ```
     $ sudo su
     # cd /root
     # python -m venv ezmsg-gadget-env
@@ -32,19 +32,12 @@ This library was created with Raspberry Pi devices in mind.  It may be possible 
     (ezmsg-gadget-env) # ezmsg-gadget install --install-endpoint-service -y
     # reboot
     ```
-Note that in the script above, ezmsg-gadget is installed to __system__ Python, using `pip install` as superuser.  This is because `ezmsg-gadget activate` must be executed as `root`, and the `systemd` service files that the installer places involve running code from `ezmsg-gadget` _as root during boot_.  
+Note that in the script above, ezmsg-gadget is installed to a special virtual environment in `/root`.  This is because `ezmsg-gadget activate` must be executed as `root`, and the `systemd` service files that the installer places involve running code from `ezmsg-gadget` _as root during boot_.  
 
 ## Uninstall
-Again, __AS SUPERUSER__ (`sudo su`):
-``` bash
-ezmsg-gadget uninstall
 ```
-
-Because we have to install `ezmsg-gadget` as root to the system Python installation, uninstall is a little tricky.  A simple `pip uninstall ezmsg-gadget` fails because of the special install location.  Currently, the only workaround is to manually uninstall by deleting:
-
-* `/usr/local/lib/python3.9/dist-packages/ezmsg/gadget`
-* `/usr/local/lib/python3.9/dist-packages/ezmsg-gadget_[X.Y.Z].dist-info`
-* `/usr/local/bin/ezmsg-gadget`
+sudo /root/ezmsg-gadget-env/bin/ezmsg-gadget uninstall
+```
 
 # Usage
 __`ezmsg-gadget` has two functions:__
