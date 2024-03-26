@@ -1,4 +1,5 @@
 
+import sys
 import typing
 
 from subprocess import Popen, PIPE
@@ -69,7 +70,9 @@ def install(
         print('Why? Activating ezmsg-gadget requires root, so do it on boot automatically')
         if _confirm_prompt(f'Write {BOOT_SERVICE_FILE} to {service_dir}', yes):
             with open(service_dir / BOOT_SERVICE_FILE, 'w') as f:
-                f.write(data_files.joinpath(BOOT_SERVICE_FILE).read_text())
+                boot_service_text = data_files.joinpath(BOOT_SERVICE_FILE).read_text()
+                boot_service_text = boot_service_text.replace('python', sys.executable)
+                f.write(boot_service_text)
             if _confirm_prompt('Issue "systemctl daemon-reload"', yes):
                 _run_command('systemctl daemon-reload', test_result = b'' if test else None)
 
@@ -108,7 +111,9 @@ def install(
             print('WARNING: Endpoint service runs as user ezmsg-gadget...')
         if _confirm_prompt(f'Write {ENDPOINT_SERVICE_FILE} to {service_dir}', yes):
             with open(service_dir / ENDPOINT_SERVICE_FILE, 'w') as f:
-                f.write(data_files.joinpath(ENDPOINT_SERVICE_FILE).read_text())
+                endpoint_service_text = data_files.joinpath(ENDPOINT_SERVICE_FILE).read_text()
+                endpoint_service_text = endpoint_service_text.replace('python', sys.executable)
+                f.write(endpoint_service_text)
                 if _confirm_prompt('Issue "systemctl daemon-reload"', yes):
                     _run_command('systemctl daemon-reload', test_result = b'' if test else None)
 

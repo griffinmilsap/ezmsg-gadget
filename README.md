@@ -24,9 +24,8 @@ This library was created with Raspberry Pi devices in mind.  It may be possible 
 2. Run the following commands:
     ```
     $ sudo su
-    # cd /root
-    # python -m venv ezmsg-gadget-env
-    # source ezmsg-gadget-env/bin/activate
+    # python -m venv /opt/ezmsg-gadget
+    # source /opt/ezmsg-gadget/bin/activate
     (ezmsg-gadget-env) # pip install --upgrade pip
     (ezmsg-gadget-env) # pip install git+https://github.com/griffinmilsap/ezmsg-gadget.git
     (ezmsg-gadget-env) # ezmsg-gadget install -y
