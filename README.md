@@ -31,11 +31,11 @@ This library was created with Raspberry Pi devices in mind.  It may be possible 
     (ezmsg-gadget-env) # ezmsg-gadget install -y
     # reboot
     ```
-Note that in the script above, ezmsg-gadget is installed to a special virtual environment in `/root`.  This is because `ezmsg-gadget activate` must be executed as `root`, and the `systemd` service files that the installer places involve running code from `ezmsg-gadget` _as root during boot_.  
+Note that in the script above, ezmsg-gadget is installed to a special virtual environment in `/opt`.  This is because `ezmsg-gadget activate` must be executed as `root`, and the `systemd` service files that the installer places involve running code from `ezmsg-gadget` _as root during boot_.  
 
 ## Uninstall
 ```
-sudo /root/ezmsg-gadget-env/bin/ezmsg-gadget uninstall
+sudo /opt/ezmsg-gadget/bin/ezmsg-gadget uninstall
 ```
 
 # Usage
