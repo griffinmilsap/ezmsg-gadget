@@ -84,6 +84,7 @@ class BTHIDServer:
         assert os.geteuid() == 0, "This won't work without root"
 
         async def handle_control_port(conn: socket.socket, _: typing.Tuple[str, int]) -> None:
+            """ Not sure what the control port is for; we just keep it alive for now """
             try:
                 while True:
                     data = await self.loop.sock_recv(conn, 1024)
