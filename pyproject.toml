@@ -17,6 +17,7 @@ python = "^3.9"
 ezmsg = "^3.3.3"
 usb-gadget = "0.2" 
 aiofile = "^3.8.0"
+dbus-next = "^0.2.3"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.0.0"
