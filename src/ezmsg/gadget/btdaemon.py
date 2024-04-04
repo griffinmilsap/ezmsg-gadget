@@ -32,10 +32,12 @@ class BTHIDServer:
     hid_clients: typing.Dict[asyncio.Task, asyncio.Queue[bytes]]
     tcp_server: asyncio.Task
     config: GadgetConfig
+    report_map: typing.Dict[str, int]
 
     def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
         self.loop = loop
         self.hid_clients = {}
+        self.report_map = {}
 
     @classmethod
     async def start(cls, config_path: typing.Optional[Path] = None, loop: typing.Optional[asyncio.AbstractEventLoop] = None) -> "BTHIDServer":
@@ -58,7 +60,7 @@ class BTHIDServer:
                 data = await reader.readline()
                 if not data: break
                 for queue in self.hid_clients.values():
-                    queue.put_nowait(data)
+                    queue.put_nowait(data[:-1]) # Discard "newline"
         finally:
             writer.close()
     
@@ -75,14 +77,13 @@ class BTHIDServer:
 
         reports = ''
         report_id = 1
-        report_map: typing.Dict[str, int] = {}
         for fn_name, (fn_class, _) in self.config.functions.items():
             if issubclass(fn_class, HIDDefinition):
-                report_map[fn_name] = report_id
+                self.report_map[fn_name] = report_id
                 reports += f'<sequence><uint8 value="0x22" /><text encoding="hex" value="{fn_class.REPORT_DESC.hex()}" /></sequence>'
                 report_id += 1
 
-        # service_record.replace('[REPORTS]', reports)
+        service_record.replace('[REPORTS]', reports)
 
         opts = {
             "Role": Variant('s', "server"),
@@ -169,17 +170,19 @@ async def serve_l2cap_socket(
         all_connection_tasks.add(task)
 
 
-async def test(keycode: int = 30, period: float = 1.0) -> None:
+from .function import Keyboard, Mouse, Touch
+
+async def test(device: str = 'keyboard0', keycode: int = 30, period: float = 1.0) -> None:
     config = GadgetConfig()
     reader, writer = await asyncio.open_connection(*(config.bluetooth_tcp_addr))
+
     try:
         while True:
             await asyncio.sleep(period)    
-            modkey = 0
-            writer.writelines([
-                bytes([0xA1, 1, modkey, 0, keycode, 0, 0, 0, 0, 0, ord('\n')]),
-                bytes([0xA1, 1, 0, 0, 0, 0, 0, 0, 0, 0, ord('\n')]),
-            ])
+            writer.write(bytes([0xA1, 1]) + Keyboard.Message(0, keycode, tap = False).report() + bytes([ord('\n')]))
+            await writer.drain()
+            await asyncio.sleep(0.05)
+            writer.write(bytes([0xA1, 1]) + Keyboard.Message(0, 0, tap = False).report() + bytes([ord('\n')]))
             await writer.drain()
     finally:
         writer.close()
