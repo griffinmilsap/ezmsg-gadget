@@ -3,11 +3,16 @@ import socket
 import asyncio
 import typing
 
+from pathlib import Path
 from importlib.resources import files
 
 from dbus_next.aio.message_bus import MessageBus
 from dbus_next.constants import BusType
 from dbus_next.signature import Variant
+
+from .config import GadgetConfig
+from .function.hiddefinition import HIDDefinition
+
 
 
 # Bluetooth HID L2CAP ports
@@ -26,19 +31,25 @@ class BTHIDServer:
     loop: asyncio.AbstractEventLoop
     hid_clients: typing.Dict[asyncio.Task, asyncio.Queue[bytes]]
     tcp_server: asyncio.Task
+    config: GadgetConfig
 
     def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
         self.loop = loop
         self.hid_clients = {}
 
     @classmethod
-    async def start(cls, tcp_port: int, loop: typing.Optional[asyncio.AbstractEventLoop] = None) -> "BTHIDServer":
+    async def start(cls, config_path: typing.Optional[Path] = None, loop: typing.Optional[asyncio.AbstractEventLoop] = None) -> "BTHIDServer":
+
+        config = GadgetConfig(config_path)
+
         if loop is None:
             loop = asyncio.get_running_loop()
 
         hid_server = cls(loop = loop)
-        server = await asyncio.start_server(hid_server.handle_tcp_client, host = '127.0.0.1', port = tcp_port)
+        host, port = config.bluetooth_tcp_addr
+        server = await asyncio.start_server(hid_server.handle_tcp_client, host = host, port = port)
         hid_server.tcp_server = loop.create_task(server.serve_forever(), name = 'bthid_tcp_server')
+        hid_server.config = config
         return hid_server
 
     async def handle_tcp_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:
@@ -60,12 +71,25 @@ class BTHIDServer:
 
         data_files = files('ezmsg.gadget')
 
+        service_record = data_files.joinpath('sdp.xml').read_text()
+
+        reports = ''
+        report_id = 1
+        report_map: typing.Dict[str, int] = {}
+        for fn_name, (fn_class, _) in self.config.functions.items():
+            if issubclass(fn_class, HIDDefinition):
+                report_map[fn_name] = report_id
+                reports += f'<sequence><uint8 value="0x22" /><text encoding="hex" value="{fn_class.REPORT_DESC.hex()}" /></sequence>'
+                report_id += 1
+
+        # service_record.replace('[REPORTS]', reports)
+
         opts = {
             "Role": Variant('s', "server"),
             "RequireAuthentication": Variant('b', False),
             "RequireAuthorization": Variant('b', False),
             "AutoConnect": Variant('b', True),
-            "ServiceRecord": Variant('s', data_files.joinpath('sdp.xml').read_text()),
+            "ServiceRecord": Variant('s', service_record),
         }
 
         introspection = await bus.introspect("org.bluez", "/org/bluez")
@@ -73,7 +97,7 @@ class BTHIDServer:
 
         manager = bluez.get_interface("org.bluez.ProfileManager1")
 
-        await manager.call_register_profile("/bluez/ezmsg/gadget" , HID_UUID, opts) # type: ignore
+        await manager.call_register_profile("/bluez/ezmsg/gadget" , self.config.bluetooth_hid_uuid, opts) # type: ignore
 
         introspection = await bus.introspect("org.bluez", "/org/bluez/hci0")
         hci0 = bus.get_proxy_object("org.bluez", "/org/bluez/hci0", introspection)
@@ -92,9 +116,9 @@ class BTHIDServer:
             finally:
                 conn.close()
 
-        async def handle_interrupt_port(conn: socket.socket, _: typing.Tuple[str, int]) -> None:
+        async def handle_interrupt_port(conn: socket.socket, info: typing.Tuple[str, int]) -> None:
             queue: asyncio.Queue[bytes] = asyncio.Queue()
-            client_task = self.loop.create_task(self.handle_hid_client(conn, queue))
+            client_task = self.loop.create_task(self.handle_hid_client(conn, queue, info))
             client_task.add_done_callback(self.hid_clients.pop)
             self.hid_clients[client_task] = queue
 
@@ -103,7 +127,12 @@ class BTHIDServer:
             serve_l2cap_socket(handle_interrupt_port, address.value, P_INTR, loop = self.loop)
         )
 
-    async def handle_hid_client(self, interrupt: socket.socket, queue: asyncio.Queue[bytes]) -> None:
+    async def handle_hid_client(self, 
+        interrupt: socket.socket, 
+        queue: asyncio.Queue[bytes],
+        info: typing.Tuple[str, int]
+    ) -> None:
+        print(f'Bluetooth client connected: {info=}')
         try:
             while True:
                 packet = await queue.get()
@@ -111,6 +140,7 @@ class BTHIDServer:
         except ConnectionResetError:
             pass
         finally:
+            print(f'Bluetooth client disonnected: {info=}')
             interrupt.close()
 
 ConnectionCallbackType = typing.Callable[[socket.socket,typing.Tuple[str, int]], typing.Coroutine[None, None, None],]
@@ -139,8 +169,9 @@ async def serve_l2cap_socket(
         all_connection_tasks.add(task)
 
 
-async def test(tcp_port: int, keycode: int = 30, period: float = 1.0) -> None:
-    reader, writer = await asyncio.open_connection('127.0.0.1', port = tcp_port)
+async def test(keycode: int = 30, period: float = 1.0) -> None:
+    config = GadgetConfig()
+    reader, writer = await asyncio.open_connection(*(config.bluetooth_tcp_addr))
     try:
         while True:
             await asyncio.sleep(period)    
@@ -155,12 +186,12 @@ async def test(tcp_port: int, keycode: int = 30, period: float = 1.0) -> None:
 
 
 async def main() -> None:
-    server = await BTHIDServer.start(tcp_port = 6789)
+    server = await BTHIDServer.start()
 
     await asyncio.gather(
         server.serve_forever(),
-        test(6789, keycode = 30, period = 1.0),
-        test(6789, keycode = 31, period = 1.5)
+        test(keycode = 30, period = 1.0),
+        test(keycode = 31, period = 1.5)
     )
 
 if __name__ == "__main__":
