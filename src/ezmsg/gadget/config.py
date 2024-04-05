@@ -53,16 +53,6 @@ class GadgetConfig:
         self.parser.read(config_files)
 
     @property
-    def bluetooth_tcp_addr(self) -> typing.Tuple[str, int]:
-        bt_host = self.parser.get('bluetooth', 'host', fallback = 'localhost')
-        bt_port = int(self.parser.get('bluetooth', 'port', fallback = '6789'))
-        return bt_host, bt_port
-    
-    @property
-    def bluetooth_hid_uuid(self) -> str:
-        return self.parser.get('bluetooth', 'uuid', fallback = "00001124-0000-1000-8000-00805f9b34fb")
-
-    @property
     def gadget_name(self) -> str:
         return self.parser.get('gadget', 'name', fallback = 'g1')
     
