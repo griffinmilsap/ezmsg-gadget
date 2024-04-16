@@ -9,6 +9,8 @@ USB-gadget with HID control integration for Raspberry Pi (Zero/W/2W, 4, CM4)
 # Purpose
 Sometimes we want the capability to control other devices from an `ezmsg` system, and this module primarily exists to serve that purpose.  Installing this module onto a Raspberry Pi enables us to control virtual pointer and keyboards attached to any device with a USB port from within `ezmsg`.  It does this by using USB gadget mode and HID (Human Interface Device) compliant device descriptors.
 
+_Hey!  Want to do all this, but __wirelessly__ with Bluetooth? Check out [ezmsg-bthid](https://github.com/griffinmilsap/ezmsg-bthid)_
+
 # Install
 This library was created with Raspberry Pi devices in mind.  It may be possible to use this library with non-raspberry pi devices, but your mileage may vary!
 
