@@ -25,8 +25,9 @@ This library was created with Raspberry Pi devices in mind.  It may be possible 
             ```
 2. Run the following commands:
     ```
+    $ sudo apt install python3-venv
     $ sudo su
-    # python -m venv /opt/ezmsg-gadget
+    # python3 -m venv /opt/ezmsg-gadget
     # source /opt/ezmsg-gadget/bin/activate
     (ezmsg-gadget-env) # pip install --upgrade pip
     (ezmsg-gadget-env) # pip install git+https://github.com/griffinmilsap/ezmsg-gadget.git
@@ -113,7 +114,7 @@ One of the available functions this extension can enable is a virtual ethernet d
 
 ### Static IP
 It can be handy to assign a static IP address to this new interface.  To do this:
-1. Create the following file as `/etc/network/interfaces.d`
+1. Create the following file as `/etc/network/interfaces.d/usb0`
     ```
     auto usb0
     allow-hotplug usb0
@@ -121,7 +122,18 @@ It can be handy to assign a static IP address to this new interface.  To do this
         address 10.55.0.1
         netmask 255.255.255.248
     ```
-    This will ensure that whenever the usb0 ethernet device becomes available, it will automatically be brought up and will have the statically assigned IP address of `10.55.0.1`.
+    __OR if you're rolling an OS using netplan (Ubuntu)__
+    Create the following file as `/etc/netplan/99_usb0.yaml`
+    ```
+    network:
+        version: 2
+        renderer: networkd
+        ethernets:
+          usb0:
+            addresses:
+              - 10.55.0.1/29
+    ```
+   This will ensure that whenever the usb0 ethernet device becomes available, it will automatically be brought up and will have the statically assigned IP address of `10.55.0.1`.
 
 ### DHCP/DNS
 The major use case of an ethernet gadget device here is for direct wired communications with the host USB device.  To support this, it can be helpful to configure a mini DHCP server to run on the Raspberry Pi that can assign the host a suitable IP address and act as a name server.  This can be accomplished by installing and configuring `dnsmasq` as follows:
@@ -139,6 +151,11 @@ The major use case of an ethernet gadget device here is for direct wired communi
     leasefile-ro
     ```
     This will run dnsmasq on startup, and sets up the server to assign IP addresses from `10.55.0.2-6`, ensuring that your USB Host will sit at some IP address within that range.  
+    NOTE: Ubuntu server runs its own service on port 53 you'll need to disable to run dnsmasq:
+    ```
+    sudo systemctl disable systemd-resolved
+    sudo systemctl stop systemd-resolved
+    ```   
     __Pro Tip__: The IP address leases that `dnsmasq` creates can be found in `/var/lib/misc/dnsmasq.leases`.  This will tell you exactly which of the IP addresses corresponds to your USB host device.
 
 ### MAC Address Selection
