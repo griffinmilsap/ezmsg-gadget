@@ -14,7 +14,7 @@ _Hey!  Want to do all this, but __wirelessly__ with Bluetooth? Check out [ezmsg-
 # Install
 This library was created with Raspberry Pi devices in mind.  It may be possible to use this library with non-raspberry pi devices, but your mileage may vary!
 
-1. At the bottom of your /boot/config.txt file, after `[all]`, add `dtoverlay=dwc2` to enable usb gadget mode.
+1. At the bottom of your `/boot/config.txt` (`/boot/firmware/config.txt` for recent RPi OSes) file, after `[all]`, add `dtoverlay=dwc2` to enable usb gadget mode.
     1. __CM4 NOTE__: According to the [Raspberry Pi Forums](https://forums.raspberrypi.com/viewtopic.php?t=347459), on a Raspberry Pi Compute Module 4 you'll need to:
         1. Comment any lines that contain `otg_mode=1`
         1. Comment any lines that contain `dtoverlay=dwc2`
