@@ -13,7 +13,7 @@ class TouchMessageGeneratorSettings(ez.Settings):
     pub_rate: float = 60 # Hz
 
 class TouchMessageGenerator(ez.Unit):
-    SETTINGS: TouchMessageGeneratorSettings
+    SETTINGS = TouchMessageGeneratorSettings
 
     OUTPUT = ez.OutputStream(Touch.Message)
 

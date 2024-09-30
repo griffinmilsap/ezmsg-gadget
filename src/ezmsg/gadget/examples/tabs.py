@@ -10,7 +10,7 @@ class TabsSettings(ez.Settings):
     pub_rate: float = 1 # Hz
 
 class Tabs(ez.Unit):
-    SETTINGS: TabsSettings
+    SETTINGS = TabsSettings
 
     OUTPUT = ez.OutputStream(Keyboard.Message)
 
